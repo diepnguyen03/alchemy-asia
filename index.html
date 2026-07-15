@@ -58,6 +58,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 /* ── Filter bar (numbered, Alchemy-style) ── */
 .filterbar{display:flex;gap:10px;flex-wrap:wrap;align-items:stretch;margin-bottom:16px}
 .fgroup{background:var(--surface);border:1px solid var(--red);border-radius:var(--radius-md);padding:8px 12px;min-width:132px;position:relative}
+.fgroup.plain{border-color:var(--border-md)}
+.fgroup.plain .fgroup-label{color:var(--text-2)}
+.fgroup.plain .fnum{display:none}
 .fgroup-label{display:flex;align-items:center;gap:6px;font-size:9.5px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
 .fnum{width:16px;height:16px;border-radius:50%;background:var(--red);color:#fff;font-size:9px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
 .fgroup select{font-family:inherit;font-size:11px;border:none;background:transparent;color:var(--text);cursor:pointer;outline:none;width:100%}
@@ -98,6 +101,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 /* ── Bar chart threshold legend ── */
 .thr-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:10.5px;color:var(--text-2);margin-top:8px;justify-content:center}
 .thr-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px}
+.badge-row{display:flex;justify-content:space-around;margin-bottom:6px}
+.pct-badge{font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px}
+.wf-wrap{display:flex;flex-direction:column;gap:16px}
+.wf-row{display:flex;align-items:flex-start;gap:10px}
+.wf-label{width:100px;font-size:11px;font-weight:600;flex-shrink:0;padding-top:5px;display:flex;align-items:center;gap:6px}
+.wf-body{flex:1;min-width:0}
+.wf-bar-wrap{position:relative;height:22px;background:var(--surface2);border-radius:4px;overflow:hidden}
+.wf-bar{position:absolute;top:0;left:0;height:100%;border-radius:4px;transition:width .2s}
+.wf-values{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.wf-val-tag{font-size:9.5px;font-weight:700;padding:1px 7px;border-radius:8px;white-space:nowrap}
 
 /* ── Funnel ── */
 .funnel-wrap{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0}
@@ -355,7 +368,7 @@ tr.dr:last-child td{border-bottom:none}
       </div>
       <div class="panel">
         <div class="panel-hdr dark">Visit Achievement by Region (Qualified Visit)</div>
-        <div class="panel-body"><div style="position:relative;width:100%;height:250px"><canvas id="field-regionChart"></canvas></div></div>
+        <div class="panel-body"><div id="field-region-badges" class="badge-row"></div><div style="position:relative;width:100%;height:230px"><canvas id="field-regionChart"></canvas></div></div>
       </div>
     </div>
     <div class="panel" style="margin-bottom:12px">
@@ -375,7 +388,7 @@ tr.dr:last-child td{border-bottom:none}
     <div style="font-size:10.5px;color:var(--text-3);margin-top:6px;line-height:1.7">
       <b>Metric definitions:</b> Planned Visit = total visits planned based on the call plan. Check-In = visits with successful check-in. GPS Verified = visits with a valid GPS stamp. Photo Submitted = visits with a photo report captured. Qualified Visit = visits with both valid GPS and photo.<br>
       <b>Note:</b> a visit is valid only when both GPS Compliance and Photo Compliance are achieved. Lead→Prospect conversion shows the effectiveness of field activities in generating quality opportunities.<br>
-      <b>Data note:</b> Region and Sales Group are reconciled into one Region × Sales Group grid so both filters combine with true AND logic. The Sales Group table's Qualified Visit figures summed to slightly more than the reported total, so they're rescaled to match the report's exact 3,355 while preserving each group's relative share; Lead/Prospect counts (only reported as single totals) are allocated across the grid in proportion to Qualified Visit volume.
+      <b>Data note:</b> Region and Sales Group are combined into one Region × Sales Group grid so both filters apply together (true AND logic); both marginals already reconcile exactly with the report's totals. Lead/Prospect counts (only reported as single totals) are allocated across the grid in proportion to Qualified Visit volume.
     </div>
   </div></div>
 
@@ -401,13 +414,13 @@ tr.dr:last-child td{border-bottom:none}
       </div>
       <div class="panel">
         <div class="panel-hdr dark">Outlet Participation by Region <span style="font-weight:400;font-size:9px;opacity:.8">(by execution stage)</span></div>
-        <div class="panel-body"><div style="position:relative;width:100%;height:230px"><canvas id="trade-regionChart"></canvas></div></div>
+        <div class="panel-body"><div id="trade-regionChart" class="wf-wrap"></div></div>
       </div>
     </div>
     <div class="grid2">
       <div class="panel">
         <div class="panel-hdr dark">Outlet Participation by Sales Group <span style="font-weight:400;font-size:9px;opacity:.8">(by execution stage)</span></div>
-        <div class="panel-body"><div style="position:relative;width:100%;height:230px"><canvas id="trade-sgChart"></canvas></div></div>
+        <div class="panel-body"><div id="trade-sgChart" class="wf-wrap"></div></div>
       </div>
       <div class="panel">
         <div class="panel-hdr dark">Program Performance Summary</div>
@@ -416,15 +429,15 @@ tr.dr:last-child td{border-bottom:none}
     </div>
     <div class="grid3">
       <div class="panel">
-        <div class="panel-hdr dark">By Sales Group <span style="font-weight:400;font-size:9px;opacity:.8">(other filters applied)</span></div>
+        <div class="panel-hdr dark">By Sales Group <span style="font-weight:400;font-size:9px;opacity:.8">(reflects active filters)</span></div>
         <div class="panel-body"><div class="scroll-x"><table class="data-tbl" id="trade-sgTbl"></table></div></div>
       </div>
       <div class="panel">
-        <div class="panel-hdr dark">By Sales Rep. <span style="font-weight:400;font-size:9px;opacity:.8">(other filters applied)</span></div>
+        <div class="panel-hdr dark">By Sales Rep. <span style="font-weight:400;font-size:9px;opacity:.8">(reflects active filters)</span></div>
         <div class="panel-body"><div class="scroll-x"><table class="data-tbl" id="trade-repTbl"></table></div></div>
       </div>
       <div class="panel">
-        <div class="panel-hdr dark">By Principal <span style="font-weight:400;font-size:9px;opacity:.8">(other filters applied)</span></div>
+        <div class="panel-hdr dark">By Principal <span style="font-weight:400;font-size:9px;opacity:.8">(reflects active filters)</span></div>
         <div class="panel-body"><div class="scroll-x"><table class="data-tbl" id="trade-principalTbl"></table></div></div>
       </div>
     </div>
@@ -573,7 +586,7 @@ const thresholdLinePlugin = {
       if(line.label){
         ctx.save();
         ctx.fillStyle = line.color || '#C8102E';
-        ctx.font = '9px -apple-system,sans-serif';
+        ctx.font = '600 9px -apple-system,sans-serif';
         ctx.textAlign = 'center';
         const lines = line.label.split('\\n');
         lines.forEach((l,i)=>ctx.fillText(l, xPos, chartArea.bottom + 14 + i*10));
@@ -584,29 +597,74 @@ const thresholdLinePlugin = {
 };
 Chart.register(thresholdLinePlugin);
 
+// Draws "value (pct%)" directly at the end of each horizontal bar, matching the report's inline labels
+const barEndLabelPlugin = {
+  id: 'barEndLabels',
+  afterDatasetsDraw(chart, args, opts) {
+    if(!opts || !opts.enabled) return;
+    const {ctx} = chart;
+    const meta = chart.getDatasetMeta(0);
+    if(!meta || !meta.data) return;
+    ctx.save();
+    ctx.font = '600 11px -apple-system,sans-serif';
+    ctx.textBaseline = 'middle';
+    meta.data.forEach((bar, i) => {
+      const item = opts.items && opts.items[i];
+      if(!item) return;
+      ctx.fillStyle = opts.color ? (typeof opts.color==='function'?opts.color(item):opts.color) : '#181818';
+      ctx.textAlign = 'left';
+      ctx.fillText(item.text, bar.x + 8, bar.y);
+    });
+    ctx.restore();
+  }
+};
+Chart.register(barEndLabelPlugin);
+
+// Draws a value directly above each vertical bar (for Target/Achieved style mini charts)
+const barTopLabelPlugin = {
+  id: 'barTopLabels',
+  afterDatasetsDraw(chart, args, opts) {
+    if(!opts || !opts.enabled) return;
+    const {ctx} = chart;
+    const meta = chart.getDatasetMeta(0);
+    if(!meta || !meta.data) return;
+    ctx.save();
+    ctx.font = '700 15px -apple-system,sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    meta.data.forEach((bar, i) => {
+      const color = (opts.colors && opts.colors[i]) || '#181818';
+      ctx.fillStyle = color;
+      ctx.fillText(numFmt(chart.data.datasets[0].data[i]), bar.x, bar.y - 6);
+    });
+    ctx.restore();
+  }
+};
+Chart.register(barTopLabelPlugin);
+
 function renderGauge(pct, target){
-  const clamped = Math.max(0, Math.min(140, pct));
-  const angle = (clamped/140)*180;
-  const needleAngle = -180 + angle;
-  const r=70, cx=90, cy=80;
+  const clamped = Math.max(0, Math.min(100, pct));
+  const angle = (clamped/100)*180;
+  const r=76, cx=94, cy=86, sw=16;
   function arcPath(startDeg,endDeg){
     const s = (Math.PI/180)*(180-startDeg), e = (Math.PI/180)*(180-endDeg);
     const x1=cx+r*Math.cos(s), y1=cy-r*Math.sin(s);
     const x2=cx+r*Math.cos(e), y2=cy-r*Math.sin(e);
     return `M ${x1} ${y1} A ${r} ${r} 0 0 1 ${x2} ${y2}`;
   }
-  const zone1=(40/140)*180, zone2=(60/140)*180;
-  const nx = cx + (r-8)*Math.cos((Math.PI/180)*(180-angle));
-  const ny = cy - (r-8)*Math.sin((Math.PI/180)*(180-angle));
-  return `<svg viewBox="0 0 180 100" style="width:180px;height:100px">
-    <path d="${arcPath(0,zone1)}" stroke="#e0433c" stroke-width="14" fill="none" stroke-linecap="round"/>
-    <path d="${arcPath(zone1,zone2)}" stroke="#e5942a" stroke-width="14" fill="none"/>
-    <path d="${arcPath(zone2,180)}" stroke="#2e8b45" stroke-width="14" fill="none" stroke-linecap="round"/>
-    <line x1="${cx}" y1="${cy}" x2="${nx}" y2="${ny}" stroke="#181818" stroke-width="2.5" stroke-linecap="round"/>
-    <circle cx="${cx}" cy="${cy}" r="4" fill="#181818"/>
+  const zone1=(40/100)*180, zone2=(60/100)*180;
+  const nx = cx + (r-sw*0.6)*Math.cos((Math.PI/180)*(180-angle));
+  const ny = cy - (r-sw*0.6)*Math.sin((Math.PI/180)*(180-angle));
+  return `<div style="font-size:10px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.04em;text-align:center;margin-bottom:2px">Overall Achievement</div>
+  <svg viewBox="0 0 188 100" style="width:188px;height:100px">
+    <path d="${arcPath(0,zone1)}" stroke="#e0433c" stroke-width="${sw}" fill="none" stroke-linecap="round"/>
+    <path d="${arcPath(zone1,zone2)}" stroke="#e5942a" stroke-width="${sw}" fill="none"/>
+    <path d="${arcPath(zone2,180)}" stroke="#2e8b45" stroke-width="${sw}" fill="none" stroke-linecap="round"/>
+    <line x1="${cx}" y1="${cy}" x2="${nx}" y2="${ny}" stroke="#181818" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="${cx}" cy="${cy}" r="5" fill="#181818"/>
   </svg>
   <div class="gauge-val" style="color:${pctColor(clamped)}">${Math.round(pct)}%</div>
-  <div class="gauge-cap">Overall achievement vs target ${target}%</div>`;
+  <div class="gauge-cap">vs Target ${target}%</div>`;
 }
 
 function switchTop(id,btn){
@@ -627,6 +685,13 @@ function buildFilterGroup(num, label, selectId, options, extraStyle){
   let opts = options.map(o=>`<option value="${o}">${o}</option>`).join('');
   return `<div class="fgroup"${extraStyle?` style="${extraStyle}"`:''}>
     <div class="fgroup-label"><span class="fnum">${num}</span>${label}</div>
+    <select id="${selectId}">${opts}</select>
+  </div>`;
+}
+function buildFilterGroupPlain(label, selectId, options, extraStyle){
+  let opts = options.map(o=>`<option value="${o}">${o}</option>`).join('');
+  return `<div class="fgroup plain"${extraStyle?` style="${extraStyle}"`:''}>
+    <div class="fgroup-label">${label}</div>
     <select id="${selectId}">${opts}</select>
   </div>`;
 }
@@ -745,26 +810,31 @@ function renderUniverse(){
     <div style="display:flex;align-items:center;gap:8px"><span style="width:10px;height:10px;border-radius:2px;background:var(--red)"></span><div><div style="font-weight:700">${numFmt(indirect)} <span style="font-size:11px;font-weight:400;color:var(--text-3)">(${100-directPct}%)</span></div><div style="font-size:10.5px;color:var(--text-3)">Indirect Outlet</div></div></div>
   `;
 
-  if(uniCharts.donut) uniCharts.donut.destroy();
-  uniCharts.donut = new Chart(document.getElementById('uni-classDonut'),{
-    type:'doughnut',
-    data:{labels:['Direct','Indirect'],datasets:[{data:[direct,indirect],backgroundColor:['#8f8d88','#C8102E'],borderWidth:2,borderColor:'#fff'}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${numFmt(ctx.raw)}`}}},cutout:'62%'}
-  });
+  try{
+    if(uniCharts.donut) uniCharts.donut.destroy();
+    uniCharts.donut = new Chart(document.getElementById('uni-classDonut'),{
+      type:'doughnut',
+      data:{labels:['Direct','Indirect'],datasets:[{data:[direct,indirect],backgroundColor:['#8f8d88','#C8102E'],borderWidth:2,borderColor:'#fff'}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${numFmt(ctx.raw)}`}}},cutout:'62%'}
+    });
+  }catch(e){ console.error('uni-classDonut failed', e); }
 
+  const regionKeysUni = document.getElementById('uni-f-region').value!=='All' ? [document.getElementById('uni-f-region').value] : ['North','Central','South'];
   const regionAgg={};
-  ['North','Central','South'].forEach(r=>{regionAgg[r]={lead:0,prospect:0,customer:0}});
-  rows.forEach(r=>{regionAgg[r.region].lead+=r.lead;regionAgg[r.region].prospect+=r.prospect;regionAgg[r.region].customer+=r.customer});
-  if(uniCharts.region) uniCharts.region.destroy();
-  uniCharts.region = new Chart(document.getElementById('uni-regionChart'),{
-    type:'bar',
-    data:{labels:['North','Central','South'],datasets:[
-      {label:'Lead',data:['North','Central','South'].map(r=>Math.round(regionAgg[r].lead)),backgroundColor:'#c9c7c2',borderRadius:3},
-      {label:'Prospect',data:['North','Central','South'].map(r=>Math.round(regionAgg[r].prospect)),backgroundColor:'#8f8d88',borderRadius:3},
-      {label:'Customer',data:['North','Central','South'].map(r=>Math.round(regionAgg[r].customer)),backgroundColor:'#C8102E',borderRadius:3}
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10}}},y:{stacked:true,grid:{color:'rgba(0,0,0,.04)'},ticks:{font:{size:10}}}}}
-  });
+  regionKeysUni.forEach(r=>{regionAgg[r]={lead:0,prospect:0,customer:0}});
+  rows.forEach(r=>{if(regionAgg[r.region]){regionAgg[r.region].lead+=r.lead;regionAgg[r.region].prospect+=r.prospect;regionAgg[r.region].customer+=r.customer}});
+  try{
+    if(uniCharts.region) uniCharts.region.destroy();
+    uniCharts.region = new Chart(document.getElementById('uni-regionChart'),{
+      type:'bar',
+      data:{labels:regionKeysUni,datasets:[
+        {label:'Lead',data:regionKeysUni.map(r=>Math.round(regionAgg[r].lead)),backgroundColor:'#c9c7c2',borderRadius:3,barThickness:regionKeysUni.length===1?36:undefined},
+        {label:'Prospect',data:regionKeysUni.map(r=>Math.round(regionAgg[r].prospect)),backgroundColor:'#8f8d88',borderRadius:3,barThickness:regionKeysUni.length===1?36:undefined},
+        {label:'Customer',data:regionKeysUni.map(r=>Math.round(regionAgg[r].customer)),backgroundColor:'#C8102E',borderRadius:3,barThickness:regionKeysUni.length===1?36:undefined}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10}}},y:{stacked:true,grid:{color:'rgba(0,0,0,.04)'},ticks:{font:{size:10}}}}}
+    });
+  }catch(e){ console.error('uni-regionChart failed', e); }
 }
 
 function buildUniverseFilterBar(){
@@ -887,20 +957,24 @@ function makeThresholdBar(canvasId, data){
   const labels=data.map(d=>d.k);
   const values=data.map(d=>d.v);
   const colors=data.map(d=>pctColor(d.p));
-  if(depthCharts[canvasId]) depthCharts[canvasId].destroy();
-  depthCharts[canvasId]=new Chart(document.getElementById(canvasId),{
-    type:'bar',
-    data:{labels,datasets:[{data:values,backgroundColor:colors,borderRadius:3,borderSkipped:false}]},
-    options:{
-      indexAxis:'y',responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},
-        tooltip:{callbacks:{label:ctx=>` ${Math.round(data[ctx.dataIndex].v)} pts (${Math.round(data[ctx.dataIndex].p)}%)`}},
-        thresholdLines:{lines:[{value:100,color:'#e5942a',label:'40%\\n(100 pts)'},{value:151,color:'#2e8b45',label:'>60%\\n(151 pts)'}]}
-      },
-      layout:{padding:{bottom:22}},
-      scales:{x:{min:0,max:260,grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:9.5}}},y:{grid:{display:false},ticks:{font:{size:9.5}}}}
-    }
-  });
+  const labelItems=data.map(d=>({text:`${Math.round(d.v)} (${Math.round(d.p)}%)`}));
+  try{
+    if(depthCharts[canvasId]) depthCharts[canvasId].destroy();
+    depthCharts[canvasId]=new Chart(document.getElementById(canvasId),{
+      type:'bar',
+      data:{labels,datasets:[{data:values,backgroundColor:colors,borderRadius:3,borderSkipped:false,barThickness:data.length===1?28:undefined}]},
+      options:{
+        indexAxis:'y',responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},
+          tooltip:{callbacks:{label:ctx=>` ${Math.round(data[ctx.dataIndex].v)} pts (${Math.round(data[ctx.dataIndex].p)}%)`}},
+          thresholdLines:{lines:[{value:100,color:'#e5942a',label:'40%\\n(100 pts)'},{value:151,color:'#2e8b45',label:'>60%\\n(151 pts)'}]},
+          barEndLabels:{enabled:true, items:labelItems, color:'#181818'}
+        },
+        layout:{padding:{bottom:22,right:70}},
+        scales:{x:{min:0,max:260,grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:9.5}}},y:{grid:{display:false},ticks:{font:{size:9.5}}}}
+      }
+    });
+  }catch(e){ console.error('Chart render failed for '+canvasId, e); }
 }
 
 function renderDepth(){
@@ -920,21 +994,32 @@ function renderDepth(){
   if(parts.length){scopeNote.style.display='inline-flex';scopeNote.innerHTML=`Showing: ${parts.join(' · ')} <button onclick="resetDepthFilters()">clear</button>`;}
   else{scopeNote.style.display='none';}
 
-  function groupBy(dim, keys){
-    const exclude=dim;
-    const base=depthJointData.filter(r=>depthMatch(r,f,exclude));
-    return keys.map(k=>{
+  // Collapse a "by X" chart to just the selected value when X itself is filtered.
+  // When no OTHER dimension is filtered, show the report's exact static figures
+  // (pixel-accurate); only fall back to the computed joint-data average once a
+  // genuine cross-dimension filter is active (true AND filtering, necessarily approximate).
+  function otherFiltersAllAll(dim){
+    return Object.keys(f).every(k=> k===dim || f[k]==='All');
+  }
+  function groupBy(dim, keys, staticArr){
+    if(otherFiltersAllAll(dim)){
+      const rows = f[dim]!=='All' ? staticArr.filter(r=>r.k===f[dim]) : staticArr;
+      return rows.map(r=>({k:r.k, v:r.v, p:r.p}));
+    }
+    const base=depthJointData.filter(r=>depthMatch(r,f,null));
+    const displayKeys = f[dim]!=='All' ? [f[dim]] : keys;
+    return displayKeys.map(k=>{
       const sub=base.filter(r=>r[dim]===k);
       const {avg}=weightedDepth(sub);
       return {k, v:avg, p:avg/251*100};
     });
   }
-  makeThresholdBar('depth-regionChart', groupBy('region', depthByRegion.map(r=>r.k)));
-  makeThresholdBar('depth-channelChart', groupBy('channel', depthByChannel.map(r=>r.k)));
-  makeThresholdBar('depth-sgChart', groupBy('salesGroup', depthBySG.map(r=>r.k)));
-  makeThresholdBar('depth-repChart', groupBy('salesRep', depthByRep.map(r=>r.k)));
-  makeThresholdBar('depth-principalChart', groupBy('principal', depthByPrincipal.map(r=>r.k)));
-  makeThresholdBar('depth-brandChart', groupBy('brand', depthByBrand.map(r=>r.k)));
+  makeThresholdBar('depth-regionChart', groupBy('region', depthByRegion.map(r=>r.k), depthByRegion));
+  makeThresholdBar('depth-channelChart', groupBy('channel', depthByChannel.map(r=>r.k), depthByChannel));
+  makeThresholdBar('depth-sgChart', groupBy('salesGroup', depthBySG.map(r=>r.k), depthBySG));
+  makeThresholdBar('depth-repChart', groupBy('salesRep', depthByRep.map(r=>r.k), depthByRep));
+  makeThresholdBar('depth-principalChart', groupBy('principal', depthByPrincipal.map(r=>r.k), depthByPrincipal));
+  makeThresholdBar('depth-brandChart', groupBy('brand', depthByBrand.map(r=>r.k), depthByBrand));
 
   const tbl=document.getElementById('depth-productTbl');
   const product=document.getElementById('depth-f-product')?.value||'All';
@@ -993,18 +1078,16 @@ const fieldMonths={
 const fieldTotals={weeklyTarget:1070, weeklyAch:88.8, leadCreated:60, leadTarget:75, leadAch:80.0, prospectCreated:30, prospectTarget:38, prospectRate:50.0};
 const fieldPipelineFrac=[1,.861,.799,.743,.723]; // Planned/Check-In/GPS/Photo/Qualified as fraction of Planned
 const fieldRegionPop=[{k:'North',target:1640,achieved:1180},{k:'Central',target:1620,achieved:1155},{k:'South',target:1380,achieved:1020}];
-const fieldSGPopRaw=[
+const fieldSGPop=[
   {k:'WS-Central',target:1060,achieved:783},
-  {k:'WS-North',target:1280,achieved:1455},
+  {k:'WS-North',target:1280,achieved:954},
   {k:'OT-South',target:940,achieved:640},
   {k:'WS-South',target:800,achieved:573},
   {k:'Modern Trade',target:560,achieved:405}
 ];
-// Reconcile: region achieved sums to 3,355 (matches report total exactly);
-// sales-group achieved sums to 3,856 — rescale so both marginals agree.
+// Region achieved sums to 3,355 and Sales Group achieved sums to 3,355 — both
+// marginals already agree with the report's exact headline total, no rescaling needed.
 const FIELD_GRAND_TARGET=4640, FIELD_GRAND_QUALIFIED=3355;
-const fieldSGAchievedRaw=fieldSGPopRaw.reduce((s,r)=>s+r.achieved,0);
-const fieldSGPop=fieldSGPopRaw.map(r=>({k:r.k,target:r.target,achieved:r.achieved*(FIELD_GRAND_QUALIFIED/fieldSGAchievedRaw)}));
 
 // Build the Region × Sales Group grid via outer-product (both marginals already
 // sum to the same grand totals after reconciliation, so this satisfies both exactly).
@@ -1082,31 +1165,37 @@ function renderField(){
   ph+='</div><div class="pipe-caption">Outlets / Visits</div>';
   pipe.innerHTML=ph;
 
-  // by-region chart: cross-filtered, excluding the region filter itself
-  const regionCellsBase=fieldFilteredCells(f,'region');
-  const regionData=fieldRegionPop.map(rg=>{
-    const cells2=regionCellsBase.filter(c=>c.region===rg.k);
+  // by-region chart: collapses to the selected region if Region filter is set
+  const regionKeys = f.region!=='All' ? [f.region] : fieldRegionPop.map(r=>r.k);
+  const regionCellsBase=fieldFilteredCells(f,null);
+  const regionData=regionKeys.map(k=>{
+    const cells2=regionCellsBase.filter(c=>c.region===k);
     const t=cells2.reduce((s,c)=>s+c.target,0)*factor, q=cells2.reduce((s,c)=>s+c.qualified,0)*factor;
-    return {k:rg.k, target:t, qualified:q, p:t?Math.round(q/t*1000)/10:0};
+    return {k, target:t, qualified:q, p:t?Math.round(q/t*1000)/10:0};
   });
-  if(fieldCharts.region) fieldCharts.region.destroy();
-  fieldCharts.region=new Chart(document.getElementById('field-regionChart'),{
-    type:'bar',
-    data:{labels:regionData.map(r=>r.k),datasets:[
-      {label:'Monthly Target (Visits)',data:regionData.map(r=>Math.round(r.target)),backgroundColor:'#2f6fed',borderRadius:3},
-      {label:'Qualified Visit (Valid)',data:regionData.map(r=>Math.round(r.qualified)),backgroundColor:'#2e8b45',borderRadius:3}
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}},
-      tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${numFmt(ctx.raw)}`}}},
-      scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10}}}}}
-  });
+  const regionBadges=document.getElementById('field-region-badges');
+  if(regionBadges) regionBadges.innerHTML=regionData.map(r=>`<div class="pct-badge" style="color:${pctColor100(r.p)};background:${pctColor100(r.p)}22">${r.p}%</div>`).join('');
+  try{
+    if(fieldCharts.region) fieldCharts.region.destroy();
+    fieldCharts.region=new Chart(document.getElementById('field-regionChart'),{
+      type:'bar',
+      data:{labels:regionData.map(r=>r.k),datasets:[
+        {label:'Monthly Target (Visits)',data:regionData.map(r=>Math.round(r.target)),backgroundColor:'#2f6fed',borderRadius:3,barThickness:regionData.length===1?36:undefined},
+        {label:'Qualified Visit (Valid)',data:regionData.map(r=>Math.round(r.qualified)),backgroundColor:'#2e8b45',borderRadius:3,barThickness:regionData.length===1?36:undefined}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}},
+        tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${numFmt(ctx.raw)}`}}},
+        scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10}}}}}
+    });
+  }catch(e){ console.error('field-regionChart failed', e); }
 
-  // by-sales-group table: cross-filtered, excluding the sales group filter itself
-  const sgCellsBase=fieldFilteredCells(f,'salesGroup');
-  const sgData=fieldSGPop.map(sg=>{
-    const cells2=sgCellsBase.filter(c=>c.salesGroup===sg.k);
+  // by-sales-group table: collapses to the selected sales group if that filter is set
+  const sgKeys = f.salesGroup!=='All' ? [f.salesGroup] : fieldSGPop.map(r=>r.k);
+  const sgCellsBase=fieldFilteredCells(f,null);
+  const sgData=sgKeys.map(k=>{
+    const cells2=sgCellsBase.filter(c=>c.salesGroup===k);
     const t=cells2.reduce((s,c)=>s+c.target,0)*factor, q=cells2.reduce((s,c)=>s+c.qualified,0)*factor;
-    return {k:sg.k, target:t, qualified:q, p:t?Math.round(q/t*1000)/10:0};
+    return {k, target:t, qualified:q, p:t?Math.round(q/t*1000)/10:0};
   });
   const sgTbl=document.getElementById('field-sgTbl');
   let th='<tr><th>#</th><th>Sales Group</th><th class="r">Monthly Target (Visits)</th><th class="r">Qualified Visit (Valid)</th><th class="r">Achievement (%)</th></tr>';
@@ -1119,17 +1208,21 @@ function renderField(){
   sgTbl.innerHTML=th;
 
   if(fieldCharts.lead) fieldCharts.lead.destroy();
-  fieldCharts.lead=new Chart(document.getElementById('field-leadChart'),{
-    type:'bar',
-    data:{labels:['Target','Achieved'],datasets:[{data:[Math.round(fieldTotals.leadTarget*factor*shareOfTotal),Math.round(fieldTotals.leadCreated*factor*shareOfTotal)],backgroundColor:['#2f6fed','#2e8b45'],borderRadius:4}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:11}}}}}
-  });
+  try{
+    fieldCharts.lead=new Chart(document.getElementById('field-leadChart'),{
+      type:'bar',
+      data:{labels:['Target','Achieved'],datasets:[{data:[Math.round(fieldTotals.leadTarget*factor*shareOfTotal),Math.round(fieldTotals.leadCreated*factor*shareOfTotal)],backgroundColor:['#2f6fed','#2e8b45'],borderRadius:4}]},
+      options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:20}},plugins:{legend:{display:false},barTopLabels:{enabled:true,colors:['#2f6fed','#2e8b45']}},scales:{y:{beginAtZero:true,grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:11}}}}}
+    });
+  }catch(e){ console.error('field-leadChart failed', e); }
   if(fieldCharts.prospect) fieldCharts.prospect.destroy();
-  fieldCharts.prospect=new Chart(document.getElementById('field-prospectChart'),{
-    type:'bar',
-    data:{labels:['Target','Achieved'],datasets:[{data:[Math.round(fieldTotals.prospectTarget*factor*shareOfTotal),Math.round(fieldTotals.prospectCreated*factor*shareOfTotal)],backgroundColor:['#2f6fed','#8b5cf6'],borderRadius:4}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:11}}}}}
-  });
+  try{
+    fieldCharts.prospect=new Chart(document.getElementById('field-prospectChart'),{
+      type:'bar',
+      data:{labels:['Target','Achieved'],datasets:[{data:[Math.round(fieldTotals.prospectTarget*factor*shareOfTotal),Math.round(fieldTotals.prospectCreated*factor*shareOfTotal)],backgroundColor:['#2f6fed','#8b5cf6'],borderRadius:4}]},
+      options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:20}},plugins:{legend:{display:false},barTopLabels:{enabled:true,colors:['#2f6fed','#8b5cf6']}},scales:{y:{beginAtZero:true,grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:11}}}}}
+    });
+  }catch(e){ console.error('field-prospectChart failed', e); }
 }
 function resetFieldFilters(){
   document.getElementById('field-f-region').value='All';
@@ -1139,9 +1232,9 @@ function resetFieldFilters(){
 function buildFieldFilterBar(){
   const el=document.getElementById('field-filterbar');
   el.innerHTML=
-    buildFilterGroup(1,'Time','field-f-month',Object.keys(fieldMonths))+
-    buildFilterGroup(2,'Region','field-f-region',['All',...fieldRegionPop.map(r=>r.k)])+
-    buildFilterGroup(3,'Sales Group','field-f-sg',['All',...fieldSGPop.map(r=>r.k)])+
+    buildFilterGroupPlain('Time','field-f-month',Object.keys(fieldMonths))+
+    buildFilterGroupPlain('Region','field-f-region',['All',...fieldRegionPop.map(r=>r.k)])+
+    buildFilterGroupPlain('Sales Group','field-f-sg',['All',...fieldSGPop.map(r=>r.k)])+
     `<button class="reset-btn" onclick="resetFieldFilters()">↺<span>Reset</span></button>`;
   el.querySelectorAll('select').forEach(s=>s.addEventListener('change',renderField));
 }
@@ -1166,6 +1259,32 @@ const tradeRegionPop=[{k:'North',n:100},{k:'Central',n:80},{k:'South',n:60}];
 const tradeSGPop=[{k:'WS-Central',n:90,rate:63.2},{k:'WS-North',n:70,rate:63.5},{k:'OT-South',n:50,rate:60.5},{k:'WS-South',n:20,rate:53.3},{k:'Modern Trade',n:10,rate:42.9}];
 const tradeRepPopNamed=[{k:'Le Tri Nguyen',n:40},{k:'Ly Tien Vinh',n:35},{k:'Phan Tu Quyen',n:32},{k:'Duong Quoc Linh',n:28},{k:'Luong Dinh Khang',n:25}];
 const tradePrincipalPopRaw=[{k:'The Macallan',n:60,rate:62.2},{k:'Proximo/Remy',n:50,rate:57.9},{k:'Jose Cuervo',n:50,rate:57.9},{k:'Campari',n:45,rate:58.8},{k:'Lucas Bols',n:45,rate:59.4},{k:'Jagermeister',n:40,rate:58.9}];
+// Literal per-dimension stage breakdowns from the report (used whenever no other
+// dimension is being cross-filtered, so the default view is pixel-exact)
+const tradeByRegionStatic=[{k:'North',v:[100,75,65,50,48]},{k:'Central',v:[80,60,50,40,38]},{k:'South',v:[60,45,35,30,26]}];
+const tradeBySGStatic=[
+  {k:'WS-Central',v:[90,68,57,46,43],rate:63.2},
+  {k:'WS-North',v:[70,52,44,36,33],rate:63.5},
+  {k:'OT-South',v:[50,38,32,25,23],rate:60.5},
+  {k:'WS-South',v:[20,15,12,9,8],rate:53.3},
+  {k:'Modern Trade',v:[10,7,5,4,3],rate:42.9}
+];
+const tradeByRepStatic=[
+  {k:'Le Tri Nguyen',v:[40,26,25,20,18],rate:60.0},
+  {k:'Ly Tien Vinh',v:[35,26,20,18,18],rate:61.5},
+  {k:'Phan Tu Quyen',v:[32,24,20,16,15],rate:62.5},
+  {k:'Duong Quoc Linh',v:[28,20,17,14,13],rate:65.0},
+  {k:'Luong Dinh Khang',v:[25,18,15,12,11],rate:61.1},
+  {k:'Unassigned',v:[80,66,53,40,37],rate:56.1}
+];
+const tradeByPrincipalStatic=[
+  {k:'The Macallan',v:[60,45,34,30,28],rate:62.2},
+  {k:'Proximo/Remy',v:[50,38,31,24,22],rate:57.9},
+  {k:'Jose Cuervo',v:[50,38,31,24,22],rate:57.9},
+  {k:'Campari',v:[45,34,26,22,20],rate:58.8},
+  {k:'Lucas Bols',v:[45,32,26,22,19],rate:59.4},
+  {k:'Jagermeister',v:[40,31,27,20,18],rate:58.9}
+];
 const tradePrograms=[
   {name:'The Viet Margarita',principal:'Proximo/Remy',brand:'Jose Cuervo/Cointreau',hunting:60,approved:45,settlement:38,rate:84.4},
   {name:'Day of The Dead',principal:'Proximo',brand:'Jose Cuervo',hunting:50,approved:38,settlement:31,rate:81.6},
@@ -1276,11 +1395,20 @@ function renderTrade(){
   ph+='</div><div class="pipe-caption">Outlets</div>';
   document.getElementById('trade-pipeline').innerHTML=ph;
 
-  // cross-filtered "by X" grouping: apply every filter except the one being charted
-  function groupBy(dim, keys){
-    const excludeMap={region:'region',salesGroup:'salesGroup',salesRep:'salesRep',principal:'principal'};
-    const base=tradeJointData.filter(r=>tradeMatch(r,f,excludeMap[dim]));
-    return keys.map(k=>{
+  // "by X" grouping: collapses to the selected value when X itself is filtered.
+  // When no OTHER dimension is filtered, use the report's exact static figures;
+  // only fall back to the joint-data estimate for genuine cross-dimension filters.
+  function otherFiltersAllAll(dim){
+    return Object.keys(f).every(k=> k===dim || f[k]==='All');
+  }
+  function groupBy(dim, keys, staticArr){
+    if(otherFiltersAllAll(dim)){
+      const rows = f[dim]!=='All' ? staticArr.filter(r=>r.k===f[dim]) : staticArr;
+      return rows.map(r=>({k:r.k, v:r.v.map(v=>v*factor), rate:r.rate}));
+    }
+    const base=tradeJointData.filter(r=>tradeMatch(r,f,null));
+    const displayKeys = f[dim]!=='All' ? [f[dim]] : keys;
+    return displayKeys.map(k=>{
       const sub=base.filter(r=>r[dim]===k);
       const c=stageCounts(sub).map(v=>v*factor);
       const rate=c[1]?Math.round(c[4]/c[1]*100*10)/10:0;
@@ -1288,25 +1416,22 @@ function renderTrade(){
     });
   }
 
-  const regionData=groupBy('region', tradeRegionPop.map(p=>p.k));
-  const sgData=groupBy('salesGroup', tradeSGPop.map(p=>p.k));
-  const repData=groupBy('salesRep', [...tradeRepPopNamed.map(p=>p.k),'Unassigned']);
-  const principalData=groupBy('principal', tradePrincipalPopRaw.map(p=>p.k));
+  const regionData=groupBy('region', tradeRegionPop.map(p=>p.k), tradeByRegionStatic);
+  const sgData=groupBy('salesGroup', tradeSGPop.map(p=>p.k), tradeBySGStatic);
+  const repData=groupBy('salesRep', [...tradeRepPopNamed.map(p=>p.k),'Unassigned'], tradeByRepStatic);
+  const principalData=groupBy('principal', tradePrincipalPopRaw.map(p=>p.k), tradeByPrincipalStatic);
 
-  if(tradeCharts.region) tradeCharts.region.destroy();
-  tradeCharts.region=new Chart(document.getElementById('trade-regionChart'),{
-    type:'bar',
-    data:{labels:regionData.map(r=>r.k),datasets:STAGE_LABELS.map((s,i)=>({label:s,data:regionData.map(r=>Math.round(r.v[i])),backgroundColor:STAGE_COLORS[i]}))},
-    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:9}}}},
-      scales:{x:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10}}},y:{grid:{display:false},ticks:{font:{size:10}}}}}
-  });
-  if(tradeCharts.sg) tradeCharts.sg.destroy();
-  tradeCharts.sg=new Chart(document.getElementById('trade-sgChart'),{
-    type:'bar',
-    data:{labels:sgData.map(r=>r.k),datasets:STAGE_LABELS.map((s,i)=>({label:s,data:sgData.map(r=>Math.round(r.v[i])),backgroundColor:STAGE_COLORS[i]}))},
-    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:9}}}},
-      scales:{x:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10}}},y:{grid:{display:false},ticks:{font:{size:10}}}}}
-  });
+  function renderWaterfall(containerId, data){
+    const el=document.getElementById(containerId);
+    el.innerHTML=data.map(r=>{
+      const scaleMax=Math.max(...r.v,1);
+      const bars=STAGE_LABELS.map((s,i)=>`<div class="wf-bar" style="width:${Math.max(2,r.v[i]/scaleMax*100)}%;background:${STAGE_COLORS[i]};z-index:${i+1}"></div>`).join('');
+      const tags=STAGE_LABELS.map((s,i)=>`<span class="wf-val-tag" style="background:${STAGE_COLORS[i]}22;color:${STAGE_COLORS[i]}" title="${s}">${numFmt(r.v[i])}</span>`).join('');
+      return `<div class="wf-row"><div class="wf-label">${r.k}</div><div class="wf-body"><div class="wf-bar-wrap">${bars}</div><div class="wf-values">${tags}</div></div></div>`;
+    }).join('');
+  }
+  renderWaterfall('trade-regionChart', regionData);
+  renderWaterfall('trade-sgChart', sgData);
 
   function fillDetailTable(elId, label, data){
     let dh=`<tr><th>#</th><th>${label}</th><th class="r">Hunting</th><th class="r">Approved</th><th class="r">Active</th><th class="r">Proof</th><th class="r">Settlement</th><th class="r">Achv.</th></tr>`;
