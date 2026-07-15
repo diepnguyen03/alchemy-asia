@@ -80,18 +80,37 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 .kpi-band.cols3{grid-template-columns:repeat(3,1fr)}
 .kpi{display:flex;align-items:center;gap:12px;padding:6px 14px;border-right:.5px solid var(--border)}
 .kpi:last-child{border-right:none}
+.kpi-2col{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px;margin-bottom:8px}
+.kpi-mini{display:flex;align-items:center;gap:8px;min-width:0}
 .kpi-icon{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .kpi-icon svg{width:20px;height:20px}
+.kpi-2col{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px;margin-bottom:8px}
+.kpi-mini{display:flex;align-items:center;gap:8px;min-width:0}
+.kpi-mini .kpi-icon{width:30px;height:30px;flex-shrink:0}
+.kpi-mini .kpi-icon svg{width:15px;height:15px}
+.kpi-mini .kpi-label{font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.03em;font-weight:600;white-space:nowrap}
+.kpi-mini .kpi-val{font-size:17px;font-weight:700;line-height:1.15}
+.kpi-mini .kpi-sub{font-size:9px;color:var(--text-3)}
+.gauge-wrap.compact svg{width:150px;height:80px}
+.gauge-wrap.compact .gauge-val{font-size:20px;margin-top:-30px}
+.gauge-wrap.compact .gauge-cap{font-size:10px}
 .kpi-val{font-size:22px;font-weight:700;line-height:1;color:var(--text)}
 .kpi-val.red{color:var(--red)}
 .kpi-label{font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;font-weight:600}
 .kpi-sub{font-size:10.5px;color:var(--text-3);margin-top:3px}
 
 /* ── Panels ── */
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
-.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px}
-.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;align-items:start}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;align-items:start}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px;align-items:start}
+.grid2.eq-h,.grid3.eq-h{align-items:stretch}
 .panel{background:var(--surface);border:.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.panel.flex-fill{display:flex;flex-direction:column}
+.panel.flex-fill>.panel-body{flex:1;display:flex;flex-direction:column;min-height:0}
+/* ── Universe top layout: funnel sidebar + right-side grid ── */
+.uni-top-grid{display:grid;grid-template-columns:1.15fr 2fr;gap:12px;margin-bottom:12px;align-items:stretch}
+.uni-top-right{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.uni-funnel-panel .panel-body{flex:1;display:flex;flex-direction:column;justify-content:center}
 .panel-hdr{padding:9px 16px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.04em;display:flex;align-items:center;justify-content:space-between}
 .panel-hdr.red{background:var(--red)}
 .panel-hdr.dark{background:var(--navy)}
@@ -103,14 +122,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 .thr-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px}
 .badge-row{display:flex;justify-content:space-around;margin-bottom:6px}
 .pct-badge{font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px}
-.wf-wrap{display:flex;flex-direction:column;gap:16px}
-.wf-row{display:flex;align-items:flex-start;gap:10px}
-.wf-label{width:100px;font-size:11px;font-weight:600;flex-shrink:0;padding-top:5px;display:flex;align-items:center;gap:6px}
+.wf-wrap{display:flex;flex-direction:column;gap:18px}
+.wf-row{display:flex;align-items:center;gap:10px}
+.wf-label{width:100px;font-size:11px;font-weight:600;flex-shrink:0;display:flex;align-items:center;gap:6px}
 .wf-body{flex:1;min-width:0}
-.wf-bar-wrap{position:relative;height:22px;background:var(--surface2);border-radius:4px;overflow:hidden}
-.wf-bar{position:absolute;top:0;left:0;height:100%;border-radius:4px;transition:width .2s}
-.wf-values{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
-.wf-val-tag{font-size:9.5px;font-weight:700;padding:1px 7px;border-radius:8px;white-space:nowrap}
+.wf-bar-wrap{display:flex;height:38px;background:var(--surface2);border-radius:4px;overflow:hidden}
+.wf-seg{position:relative;display:flex;align-items:center;justify-content:center;min-width:0;overflow:hidden}
+.wf-bar-label{color:#fff;font-size:11.5px;font-weight:700;white-space:nowrap;text-shadow:0 1px 2px rgba(0,0,0,.4)}
+.wf-label-row{display:flex;gap:12px;margin-top:6px;flex-wrap:wrap}
+.wf-label-item{font-size:11px;font-weight:700;white-space:nowrap}
+.wf-legend{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:12px;padding-bottom:10px;border-bottom:.5px solid var(--border)}
+.wf-legend-item{display:flex;align-items:center;gap:5px;font-size:10.5px;font-weight:600;color:var(--text-2)}
+.wf-legend-swatch{width:10px;height:10px;border-radius:2px;display:inline-block;flex-shrink:0}
 
 /* ── Funnel ── */
 .funnel-wrap{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0}
@@ -129,6 +152,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-seri
 .pipe-num-row{display:flex;text-align:center;margin-bottom:4px}
 .pipe-num-row div{flex:1;font-size:20px;font-weight:700}
 .pipe-caption{text-align:center;font-size:11px;color:var(--text-3);font-weight:600;letter-spacing:.03em;text-transform:uppercase}
+.mini-funnel{display:flex;flex-direction:column;align-items:stretch;gap:5px;padding:2px 0}
+.panel.flex-fill .panel-body .mini-funnel{flex:1;justify-content:space-between}
+.panel.flex-fill .panel-body .funnel-wrap{flex:1;justify-content:space-between}
+.panel.flex-fill .panel-body>div#field-pipeline,.panel.flex-fill .panel-body>div#trade-pipeline{flex:1;display:flex;flex-direction:column}
+.mini-funnel-tier{color:#fff;text-align:center;border-radius:6px;padding:9px 6px;margin:0 auto;transition:width .25s;min-width:34%}
+.mf-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;opacity:.92}
+.mf-val{font-size:19px;font-weight:700;line-height:1.2}
+.mf-pct{font-size:10.5px;opacity:.88}
 
 /* ── Gauge ── */
 .gauge-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center}
@@ -147,6 +178,10 @@ table.data-tbl{width:100%;border-collapse:collapse;font-size:11px}
 .data-tbl tr:hover td{background:var(--surface2)}
 .rate-pill{display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700}
 .scroll-x{overflow-x:auto}
+.scroll-y{overflow-y:auto}
+.ctkm-tag{display:inline-block;font-size:9.5px;padding:2px 7px;border-radius:8px;font-weight:600;white-space:nowrap;color:#fff;margin:1px 3px 1px 0}
+.ctkm-prog-row:hover td{background:var(--surface2)}
+.ctkm-prog-row.active td{background:var(--red-l)}
 
 /* ── mc / heatmap kept from source, retinted ── */
 .mc-row{display:grid;gap:10px;margin-bottom:4px}
@@ -156,7 +191,7 @@ table.data-tbl{width:100%;border-collapse:collapse;font-size:11px}
 .mc-sub{font-size:10px;color:var(--text-3);margin-top:4px}
 .card{background:var(--surface);border:.5px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px}
 .card-title{font-size:11px;font-weight:700;color:var(--text-2);margin-bottom:12px;text-transform:uppercase;letter-spacing:.05em}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;align-items:start}
 .chart-legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px;font-size:11px;color:var(--text-2)}
 .leg{display:flex;align-items:center;gap:5px}
 .leg-sq{width:10px;height:10px;border-radius:2px;flex-shrink:0}
@@ -182,7 +217,7 @@ tr.dr td.f3{position:sticky;left:222px;z-index:5;background:var(--surface);text-
 tr.dr:hover td{background:#f5f4f0!important}
 tr.dr:last-child td{border-bottom:none}
 .cell{width:20px;height:20px;border-radius:3px;display:inline-block;vertical-align:middle}
-.c1{background:#C8102E}.c2{background:#8f8d88}.crl{background:#2f6fed}.cbl{background:#e0433c}.cl{background:#b9cef1}.crj{background:#e5942a}.c0{background:transparent;border:.5px solid var(--border-md)}
+.c1{background:#2e8b45}.c2{background:#8f8d88}.crl{background:#2f6fed}.cbl{background:#e0433c}.cl{background:#b9cef1}.crj{background:#e5942a}.c0{background:transparent;border:.5px solid var(--border-md)}
 .seg-tag{display:inline-block;font-size:9px;padding:1px 5px;border-radius:8px;font-weight:600;white-space:nowrap}
 .bod-hm-wrap{overflow-x:auto;overflow-y:auto;max-height:380px;border:.5px solid var(--border);border-radius:var(--radius-md)}
 .bhm-tbl{border-collapse:collapse;font-size:11px;min-width:100%}
@@ -249,6 +284,7 @@ tr.dr:last-child td{border-bottom:none}
     <button class="tab-btn" onclick="switchTab('ov-depth',this,'overview')">Distribution Depth</button>
     <button class="tab-btn" onclick="switchTab('ov-field',this,'overview')">Field Execution</button>
     <button class="tab-btn" onclick="switchTab('ov-trade',this,'overview')">Trade Program Execution</button>
+    <button class="tab-btn" onclick="switchTab('ov-ctkm',this,'overview')">Program Participation</button>
   </div>
 
   <!-- ── PAGE 1: UNIVERSE MANAGEMENT ── -->
@@ -260,34 +296,34 @@ tr.dr:last-child td{border-bottom:none}
       <div class="kpi"><div class="kpi-icon" style="background:var(--gray-l)"><svg viewBox="0 0 24 24" fill="none" stroke="#8a8884" stroke-width="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg></div><div><div class="kpi-label">Lead</div><div class="kpi-val" id="uni-kpi-lead">—</div><div class="kpi-sub" id="uni-kpi-lead-pct">—</div></div></div>
       <div class="kpi"><div class="kpi-icon" style="background:var(--red-l)"><svg viewBox="0 0 24 24" fill="none" stroke="#C8102E" stroke-width="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg></div><div><div class="kpi-label">Customer</div><div class="kpi-val red" id="uni-kpi-cust">—</div><div class="kpi-sub" id="uni-kpi-cust-pct">—</div></div></div>
     </div>
-    <div class="grid3">
-      <div class="panel" style="grid-column:span 1">
+    <div class="uni-top-grid">
+      <div class="panel flex-fill uni-funnel-panel">
         <div class="panel-hdr red">Funnel Overview</div>
         <div class="panel-body">
           <div class="funnel-wrap" id="uni-funnel"></div>
           <div class="funnel-arrow-row"><span>Lead</span>→<span>Prospect</span>→<span>Customer</span></div>
         </div>
       </div>
-      <div class="panel">
-        <div class="panel-hdr dark">Key Summary</div>
-        <div class="panel-body"><table class="data-tbl" id="uni-summary-tbl"></table></div>
-      </div>
-      <div class="panel">
-        <div class="panel-hdr dark">Coverage Status <span style="font-weight:400;font-size:9px;opacity:.8">(Customers only)</span></div>
-        <div class="panel-body" id="uni-coverage"></div>
-      </div>
-    </div>
-    <div class="grid2">
-      <div class="panel">
-        <div class="panel-hdr dark">Customer Breakdown by Classification</div>
-        <div class="panel-body" style="display:flex;align-items:center;gap:20px">
-          <div style="position:relative;width:180px;height:180px;flex-shrink:0"><canvas id="uni-classDonut"></canvas></div>
-          <div style="flex:1" id="uni-classLegend"></div>
+      <div class="uni-top-right">
+        <div class="panel">
+          <div class="panel-hdr dark">Key Summary</div>
+          <div class="panel-body"><table class="data-tbl" id="uni-summary-tbl"></table></div>
         </div>
-      </div>
-      <div class="panel">
-        <div class="panel-hdr dark">Universe by Region &amp; Stage</div>
-        <div class="panel-body"><div style="position:relative;width:100%;height:230px"><canvas id="uni-regionChart"></canvas></div></div>
+        <div class="panel">
+          <div class="panel-hdr dark">Coverage Status <span style="font-weight:400;font-size:9px;opacity:.8">(Customers only)</span></div>
+          <div class="panel-body" id="uni-coverage"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-hdr dark">Customer Breakdown by Classification</div>
+          <div class="panel-body" style="display:flex;align-items:center;gap:20px">
+            <div style="position:relative;width:140px;height:140px;flex-shrink:0"><canvas id="uni-classDonut"></canvas></div>
+            <div style="flex:1" id="uni-classLegend"></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-hdr dark">Universe by Region &amp; Stage</div>
+          <div class="panel-body"><div style="position:relative;width:100%;height:190px"><canvas id="uni-regionChart"></canvas></div></div>
+        </div>
       </div>
     </div>
   </div></div>
@@ -300,12 +336,14 @@ tr.dr:last-child td{border-bottom:none}
     <div class="grid4">
       <div class="panel">
         <div class="panel-hdr red">Depth Overview</div>
-        <div class="panel-body">
-          <div class="kpi" style="padding:6px 0;border:none"><div class="kpi-icon" style="background:var(--red-l)"><svg viewBox="0 0 24 24" fill="none" stroke="#C8102E" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><div><div class="kpi-label">Total Customers</div><div class="kpi-val red" id="depth-kpi-cust">—</div></div></div>
-          <div class="kpi" style="padding:6px 0;border:none"><div class="kpi-icon" style="background:var(--blue-l)"><svg viewBox="0 0 24 24" fill="none" stroke="#2f6fed" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div><div><div class="kpi-label">Total Products (Portfolio)</div><div class="kpi-val" id="depth-kpi-prod">251</div></div></div>
-          <div class="kpi" style="padding:6px 0;border:none"><div class="kpi-icon" style="background:var(--amber-l)"><svg viewBox="0 0 24 24" fill="none" stroke="#e5942a" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div><div><div class="kpi-label">Average Depth (pts/outlet)</div><div class="kpi-val" id="depth-kpi-avg">—</div><div class="kpi-sub" id="depth-kpi-avgpct">—</div></div></div>
-          <div class="kpi" style="padding:6px 0;border:none"><div class="kpi-icon" style="background:var(--green-l)"><svg viewBox="0 0 24 24" fill="none" stroke="#2e8b45" stroke-width="2"><path d="M4 22h16M4 22V10l8-6 8 6v12"/></svg></div><div><div class="kpi-label">Target Depth (pts/outlet)</div><div class="kpi-val" id="depth-kpi-target">156</div><div class="kpi-sub">60%</div></div></div>
-          <div style="margin-top:6px"><div id="depth-gauge" class="gauge-wrap"></div></div>
+        <div class="panel-body" style="padding-bottom:12px">
+          <div class="kpi-2col">
+            <div class="kpi-mini"><div class="kpi-icon" style="background:var(--red-l)"><svg viewBox="0 0 24 24" fill="none" stroke="#C8102E" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><div><div class="kpi-label">Total Customers</div><div class="kpi-val red" id="depth-kpi-cust">—</div></div></div>
+            <div class="kpi-mini"><div class="kpi-icon" style="background:var(--blue-l)"><svg viewBox="0 0 24 24" fill="none" stroke="#2f6fed" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div><div><div class="kpi-label">Total Products</div><div class="kpi-val" id="depth-kpi-prod">251</div></div></div>
+            <div class="kpi-mini"><div class="kpi-icon" style="background:var(--amber-l)"><svg viewBox="0 0 24 24" fill="none" stroke="#e5942a" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div><div><div class="kpi-label">Avg. Depth (pts)</div><div class="kpi-val" id="depth-kpi-avg">—</div><div class="kpi-sub" id="depth-kpi-avgpct">—</div></div></div>
+            <div class="kpi-mini"><div class="kpi-icon" style="background:var(--green-l)"><svg viewBox="0 0 24 24" fill="none" stroke="#2e8b45" stroke-width="2"><path d="M4 22h16M4 22V10l8-6 8 6v12"/></svg></div><div><div class="kpi-label">Target Depth (pts)</div><div class="kpi-val" id="depth-kpi-target">156</div><div class="kpi-sub">60%</div></div></div>
+          </div>
+          <div id="depth-gauge" class="gauge-wrap compact"></div>
         </div>
       </div>
       <div class="panel">
@@ -361,28 +399,28 @@ tr.dr:last-child td{border-bottom:none}
         <div class="kpi"><div class="kpi-icon" style="background:var(--purple-l)"><svg viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div><div class="kpi-label">Prospect Created</div><div class="kpi-val" style="color:var(--purple)" id="field-kpi-prospect">—</div><div class="kpi-sub"><span id="field-kpi-prospect-ach"></span> conversion rate</div></div></div>
       </div>
     </div>
-    <div class="grid2">
-      <div class="panel">
+    <div class="grid2 eq-h">
+      <div class="panel flex-fill">
         <div class="panel-hdr dark">Visit Execution Pipeline (Period)</div>
         <div class="panel-body" id="field-pipeline"></div>
       </div>
-      <div class="panel">
+      <div class="panel flex-fill">
         <div class="panel-hdr dark">Visit Achievement by Region (Qualified Visit)</div>
-        <div class="panel-body"><div id="field-region-badges" class="badge-row"></div><div style="position:relative;width:100%;height:230px"><canvas id="field-regionChart"></canvas></div></div>
+        <div class="panel-body"><div id="field-region-badges" class="badge-row"></div><div style="position:relative;width:100%;flex:1;min-height:230px"><canvas id="field-regionChart"></canvas></div></div>
       </div>
     </div>
-    <div class="panel" style="margin-bottom:12px">
-      <div class="panel-hdr dark">Visit Achievement by Sales Group</div>
-      <div class="panel-body"><div class="scroll-x"><table class="data-tbl" id="field-sgTbl"></table></div></div>
-    </div>
-    <div class="grid2">
-      <div class="panel">
+    <div class="grid3 eq-h">
+      <div class="panel flex-fill">
+        <div class="panel-hdr dark">Visit Achievement by Sales Group</div>
+        <div class="panel-body"><div class="scroll-x"><table class="data-tbl" id="field-sgTbl"></table></div></div>
+      </div>
+      <div class="panel flex-fill">
         <div class="panel-hdr dark">Lead Created (Period)</div>
-        <div class="panel-body"><div style="position:relative;width:100%;height:200px"><canvas id="field-leadChart"></canvas></div></div>
+        <div class="panel-body"><div style="position:relative;width:100%;flex:1;min-height:180px"><canvas id="field-leadChart"></canvas></div></div>
       </div>
-      <div class="panel">
+      <div class="panel flex-fill">
         <div class="panel-hdr dark">Prospect Created (Period)</div>
-        <div class="panel-body"><div style="position:relative;width:100%;height:200px"><canvas id="field-prospectChart"></canvas></div></div>
+        <div class="panel-body"><div style="position:relative;width:100%;flex:1;min-height:180px"><canvas id="field-prospectChart"></canvas></div></div>
       </div>
     </div>
     <div style="font-size:10.5px;color:var(--text-3);margin-top:6px;line-height:1.7">
@@ -407,36 +445,42 @@ tr.dr:last-child td{border-bottom:none}
         <div class="kpi"><div class="kpi-icon" style="background:var(--purple-l)"><svg viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2"><path d="M20 12V8H6a2 2 0 0 1 0-4h12v4M4 6v12a2 2 0 0 0 2 2h14v-4M18 12a2 2 0 0 0 0 4h4v-4z"/></svg></div><div><div class="kpi-label">Settlement</div><div class="kpi-val" style="color:var(--purple)" id="trade-kpi-settle">—</div><div class="kpi-sub">outlets</div></div></div>
       </div>
     </div>
-    <div class="grid2">
-      <div class="panel">
+    <div class="grid2 eq-h">
+      <div class="panel flex-fill">
         <div class="panel-hdr dark">Program Execution Pipeline</div>
         <div class="panel-body" id="trade-pipeline"></div>
       </div>
-      <div class="panel">
+      <div class="panel flex-fill">
         <div class="panel-hdr dark">Outlet Participation by Region <span style="font-weight:400;font-size:9px;opacity:.8">(by execution stage)</span></div>
-        <div class="panel-body"><div id="trade-regionChart" class="wf-wrap"></div></div>
+        <div class="panel-body">
+          <div class="wf-legend" id="trade-region-legend"></div>
+          <div id="trade-regionChart" class="wf-wrap" style="flex:1;justify-content:flex-start"></div>
+        </div>
       </div>
     </div>
-    <div class="grid2">
-      <div class="panel">
+    <div class="grid2 eq-h">
+      <div class="panel flex-fill">
         <div class="panel-hdr dark">Outlet Participation by Sales Group <span style="font-weight:400;font-size:9px;opacity:.8">(by execution stage)</span></div>
-        <div class="panel-body"><div id="trade-sgChart" class="wf-wrap"></div></div>
+        <div class="panel-body">
+          <div class="wf-legend" id="trade-sg-legend"></div>
+          <div id="trade-sgChart" class="wf-wrap" style="flex:1;justify-content:flex-start"></div>
+        </div>
       </div>
-      <div class="panel">
+      <div class="panel flex-fill">
         <div class="panel-hdr dark">Program Performance Summary</div>
         <div class="panel-body"><div class="scroll-x"><table class="data-tbl" id="trade-programTbl"></table></div></div>
       </div>
     </div>
-    <div class="grid3">
-      <div class="panel">
+    <div class="grid3 eq-h">
+      <div class="panel flex-fill">
         <div class="panel-hdr dark">By Sales Group <span style="font-weight:400;font-size:9px;opacity:.8">(reflects active filters)</span></div>
         <div class="panel-body"><div class="scroll-x"><table class="data-tbl" id="trade-sgTbl"></table></div></div>
       </div>
-      <div class="panel">
+      <div class="panel flex-fill">
         <div class="panel-hdr dark">By Sales Rep. <span style="font-weight:400;font-size:9px;opacity:.8">(reflects active filters)</span></div>
         <div class="panel-body"><div class="scroll-x"><table class="data-tbl" id="trade-repTbl"></table></div></div>
       </div>
-      <div class="panel">
+      <div class="panel flex-fill">
         <div class="panel-hdr dark">By Principal <span style="font-weight:400;font-size:9px;opacity:.8">(reflects active filters)</span></div>
         <div class="panel-body"><div class="scroll-x"><table class="data-tbl" id="trade-principalTbl"></table></div></div>
       </div>
@@ -445,6 +489,39 @@ tr.dr:last-child td{border-bottom:none}
       <b>Execution stage definitions:</b> Hunting List = outlets identified and proposed for the program. Approved Outlet = outlets approved for program execution. Active Execution = outlets currently executing the program. Proof Validation = proofs submitted and under validation. Settlement = incentive / reward settlement in progress.<br>
       <b>Key metric:</b> Achievement Rate = Settlement / Approved Outlet. Outlet counts are distinct counts based on the selected filters; percentages may not total 100% due to rounding.<br>
       <b>Data note:</b> Region, Sales Group, Sales Rep. and Principal now share one underlying set of 240 outlet-level records, so all four filters combine together (true AND filtering). With no filters applied, totals reproduce the report's exact headline figures (240 / 180 / 150 / 120 / 112); once you filter to a specific slice, per-stage figures are recomputed from that same record set and may differ slightly from the single-dimension tables shown earlier, since the underlying source tables didn't fully reconcile with each other (e.g. the Sales Rep and Principal tables in the original report summed to less/more than 240).
+    </div>
+  </div></div>
+
+  <!-- ── PAGE 5: PROGRAM PARTICIPATION (OUTLET ↔ CTKM) ── -->
+  <div id="tab-ov-ctkm" class="tab-panel"><div class="main">
+    <div class="section-label">Program Participation <span style="font-weight:400;text-transform:none;color:var(--text-2)">— which outlets are enrolled in which trade programs (CTKM), and vice versa</span></div>
+    <div class="filterbar" id="ctkm-filterbar"></div>
+    <div id="ctkm-scope" class="scope-note" style="display:none"></div>
+    <div class="kpi-band cols3" style="margin-bottom:12px">
+      <div class="kpi"><div class="kpi-icon" style="background:var(--red-l)"><svg viewBox="0 0 24 24" fill="none" stroke="#C8102E" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><div><div class="kpi-label">Outlets Matching Filter</div><div class="kpi-val red" id="ctkm-kpi-outlets">—</div><div class="kpi-sub">outlets</div></div></div>
+      <div class="kpi"><div class="kpi-icon" style="background:var(--blue-l)"><svg viewBox="0 0 24 24" fill="none" stroke="#2f6fed" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg></div><div><div class="kpi-label">Programs In Scope</div><div class="kpi-val" style="color:var(--blue)" id="ctkm-kpi-programs">—</div><div class="kpi-sub">CTKM</div></div></div>
+      <div class="kpi"><div class="kpi-icon" style="background:var(--amber-l)"><svg viewBox="0 0 24 24" fill="none" stroke="#e5942a" stroke-width="2"><path d="M12 20V10M18 20V4M6 20v-4"/></svg></div><div><div class="kpi-label">Avg. CTKM / Outlet</div><div class="kpi-val" style="color:var(--amber-d)" id="ctkm-kpi-avg">—</div><div class="kpi-sub">programs</div></div></div>
+    </div>
+    <div class="grid3 eq-h">
+      <div class="panel flex-fill">
+        <div class="panel-hdr dark">Số Outlet theo CTKM</div>
+        <div class="panel-body"><div style="position:relative;width:100%;flex:1;min-height:220px"><canvas id="ctkm-byProgramChart"></canvas></div></div>
+      </div>
+      <div class="panel flex-fill">
+        <div class="panel-hdr dark">Số CTKM theo Outlet <span style="font-weight:400;font-size:9px;opacity:.8">(phân bố)</span></div>
+        <div class="panel-body"><div style="position:relative;width:100%;flex:1;min-height:220px"><canvas id="ctkm-byOutletChart"></canvas></div></div>
+      </div>
+      <div class="panel flex-fill">
+        <div class="panel-hdr dark">Số Outlet theo Xếp Loại</div>
+        <div class="panel-body"><div style="position:relative;width:100%;flex:1;min-height:220px"><canvas id="ctkm-byClassChart"></canvas></div></div>
+      </div>
+    </div>
+    <div class="panel flex-fill" style="margin-bottom:12px">
+      <div class="panel-hdr red">Outlet → CTKM đang áp dụng <span style="font-weight:400;font-size:9px;opacity:.8">(reflects active filters)</span></div>
+      <div class="panel-body"><div class="scroll-x scroll-y" style="max-height:420px"><table class="data-tbl" id="ctkm-outletTbl"></table></div></div>
+    </div>
+    <div style="font-size:10.5px;color:var(--text-3);margin-top:6px;line-height:1.7">
+      <b>Note:</b> Program Participation is synthetic sample data generated for demo purposes — outlet codes, ABCD classification and CTKM enrollment are randomly assigned (seeded) in proportions consistent with the Trade Program Execution tab's totals (240 outlets; hunting-list sizes of 60/50/45/45/40 per program). An outlet can be enrolled in more than one program at once.
     </div>
   </div></div>
 
@@ -489,7 +566,7 @@ tr.dr:last-child td{border-bottom:none}
       <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:12px">
         <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center" id="segFilters"></div>
         <div class="hm-legend">
-          <span class="hm-leg"><span class="hm-sq" style="background:#C8102E"></span>Listed</span>
+          <span class="hm-leg"><span class="hm-sq" style="background:#2e8b45"></span>Listed</span>
           <span class="hm-leg"><span class="hm-sq" style="background:#2f6fed"></span>RL</span>
           <span class="hm-leg"><span class="hm-sq" style="background:#e0433c"></span>BL</span>
           <span class="hm-leg"><span class="hm-sq" style="background:#b9cef1"></span>L</span>
@@ -544,7 +621,7 @@ tr.dr:last-child td{border-bottom:none}
 
     <div class="section-label">4 — Partner × Channel Heatmap (Total Bottles)</div>
     <div class="hm-card">
-      <div style="font-size:11px;color:var(--text-2);margin-bottom:10px">Color represents volume: <span style="background:#fbe7ea;color:#8c0b20;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600">low</span> → <span style="background:#8c0b20;color:#fff;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600">high</span></div>
+      <div style="font-size:11px;color:var(--text-2);margin-bottom:10px">Color represents volume: <span style="background:#e6f4e9;color:#1c5a2c;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600">low</span> → <span style="background:#1c5a2c;color:#fff;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600">high</span></div>
       <div class="bod-hm-wrap"><table class="bhm-tbl" id="bodHmTable"></table></div>
     </div>
 
@@ -589,7 +666,7 @@ const thresholdLinePlugin = {
         ctx.font = '600 9px -apple-system,sans-serif';
         ctx.textAlign = 'center';
         const lines = line.label.split('\\n');
-        lines.forEach((l,i)=>ctx.fillText(l, xPos, chartArea.bottom + 14 + i*10));
+        lines.forEach((l,i)=>ctx.fillText(l, xPos, chartArea.bottom + 28 + i*10));
         ctx.restore();
       }
     });
@@ -642,10 +719,28 @@ const barTopLabelPlugin = {
 };
 Chart.register(barTopLabelPlugin);
 
+// Renders a 5-tier vertical funnel (decreasing width) for pipeline-style panels —
+// used instead of a flat row of boxes so the panel's height can match its neighbor.
+function renderMiniFunnel(containerId, items){
+  const maxV = items[0] && items[0].value ? items[0].value : 1;
+  let h = '<div class="mini-funnel">';
+  items.forEach(it=>{
+    const widthPct = Math.max(34, Math.min(100, Math.round((it.value/maxV)*100)));
+    h += `<div class="mini-funnel-tier" style="width:${widthPct}%;background:${it.color}">
+      <div class="mf-label">${it.label}</div>
+      <div class="mf-val">${numFmt(it.value)}</div>
+      <div class="mf-pct">${it.pct}</div>
+    </div>`;
+  });
+  h += '</div>';
+  const el = document.getElementById(containerId);
+  if(el) el.innerHTML = h;
+}
+
 function renderGauge(pct, target){
   const clamped = Math.max(0, Math.min(100, pct));
   const angle = (clamped/100)*180;
-  const r=76, cx=94, cy=86, sw=16;
+  const r=56, cx=70, cy=64, sw=12;
   function arcPath(startDeg,endDeg){
     const s = (Math.PI/180)*(180-startDeg), e = (Math.PI/180)*(180-endDeg);
     const x1=cx+r*Math.cos(s), y1=cy-r*Math.sin(s);
@@ -655,16 +750,16 @@ function renderGauge(pct, target){
   const zone1=(40/100)*180, zone2=(60/100)*180;
   const nx = cx + (r-sw*0.6)*Math.cos((Math.PI/180)*(180-angle));
   const ny = cy - (r-sw*0.6)*Math.sin((Math.PI/180)*(180-angle));
-  return `<div style="font-size:10px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.04em;text-align:center;margin-bottom:2px">Overall Achievement</div>
-  <svg viewBox="0 0 188 100" style="width:188px;height:100px">
+  return `<div style="font-size:9.5px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.04em;text-align:center;margin-bottom:0">Overall Achievement</div>
+  <svg viewBox="0 0 140 74" style="width:140px;height:74px">
     <path d="${arcPath(0,zone1)}" stroke="#e0433c" stroke-width="${sw}" fill="none" stroke-linecap="round"/>
     <path d="${arcPath(zone1,zone2)}" stroke="#e5942a" stroke-width="${sw}" fill="none"/>
     <path d="${arcPath(zone2,180)}" stroke="#2e8b45" stroke-width="${sw}" fill="none" stroke-linecap="round"/>
-    <line x1="${cx}" y1="${cy}" x2="${nx}" y2="${ny}" stroke="#181818" stroke-width="3" stroke-linecap="round"/>
-    <circle cx="${cx}" cy="${cy}" r="5" fill="#181818"/>
+    <line x1="${cx}" y1="${cy}" x2="${nx}" y2="${ny}" stroke="#181818" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="${cx}" cy="${cy}" r="4" fill="#181818"/>
   </svg>
-  <div class="gauge-val" style="color:${pctColor(clamped)}">${Math.round(pct)}%</div>
-  <div class="gauge-cap">vs Target ${target}%</div>`;
+  <div class="gauge-val" style="color:${pctColor(clamped)};margin-top:-22px;font-size:19px">${Math.round(pct)}%</div>
+  <div class="gauge-cap" style="font-size:10px">vs Target ${target}%</div>`;
 }
 
 function switchTop(id,btn){
@@ -970,7 +1065,7 @@ function makeThresholdBar(canvasId, data){
           thresholdLines:{lines:[{value:100,color:'#e5942a',label:'40%\\n(100 pts)'},{value:151,color:'#2e8b45',label:'>60%\\n(151 pts)'}]},
           barEndLabels:{enabled:true, items:labelItems, color:'#181818'}
         },
-        layout:{padding:{bottom:22,right:70}},
+        layout:{padding:{bottom:30,right:70}},
         scales:{x:{min:0,max:260,grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:9.5}}},y:{grid:{display:false},ticks:{font:{size:9.5}}}}
       }
     });
@@ -1153,17 +1248,12 @@ function renderField(){
   document.getElementById('field-kpi-prospect').textContent=numFmt(fieldTotals.prospectCreated*factor*shareOfTotal);
   document.getElementById('field-kpi-prospect-ach').textContent=fieldTotals.prospectRate+'%';
 
-  const pipe=document.getElementById('field-pipeline');
-  const colors=['#e0433c','#f2841f','#2f6fed','#2e8b45','#8b5cf6'];
   const stageLabels=['Planned Visit','Check-In','GPS Verified','Photo Submitted','Qualified Visit'];
-  let ph='<div class="pipeline">';
-  stageLabels.forEach((s,i)=>{ph+=`<div class="pipe-step" style="background:${colors[i]};--pipe-color:${colors[i]}"><div class="ps-label">${s}</div></div>`});
-  ph+='</div><div class="pipe-num-row">';
-  stages.forEach((v,i)=>{ph+=`<div style="color:${colors[i]}">${numFmt(v)}</div>`});
-  ph+='</div><div class="pipe-num-row">';
-  stages.forEach((v)=>{ph+=`<div style="font-size:10px;color:var(--text-3);font-weight:600">${target?Math.round(v/target*100):0}%</div>`});
-  ph+='</div><div class="pipe-caption">Outlets / Visits</div>';
-  pipe.innerHTML=ph;
+  const pipeColors=['#e0433c','#f2841f','#2f6fed','#2e8b45','#8b5cf6'];
+  renderMiniFunnel('field-pipeline', stageLabels.map((label,i)=>({
+    label, value: stages[i], color: pipeColors[i],
+    pct: (target?Math.round(stages[i]/target*100):0)+'%'
+  })));
 
   // by-region chart: collapses to the selected region if Region filter is set
   const regionKeys = f.region!=='All' ? [f.region] : fieldRegionPop.map(r=>r.k);
@@ -1388,12 +1478,10 @@ function renderTrade(){
   document.getElementById('trade-kpi-proof').textContent=numFmt(vals[3]);
   document.getElementById('trade-kpi-settle').textContent=numFmt(vals[4]);
 
-  let ph='<div class="pipeline">';
-  STAGE_LABELS.forEach((s,i)=>{ph+=`<div class="pipe-step" style="background:${STAGE_COLORS[i]};--pipe-color:${STAGE_COLORS[i]}"><div class="ps-label">${s}</div></div>`});
-  ph+='</div><div class="pipe-num-row">';
-  vals.forEach((v,i)=>{ph+=`<div style="color:${STAGE_COLORS[i]}">${numFmt(v)}</div>`});
-  ph+='</div><div class="pipe-caption">Outlets</div>';
-  document.getElementById('trade-pipeline').innerHTML=ph;
+  renderMiniFunnel('trade-pipeline', STAGE_LABELS.map((label,i)=>({
+    label, value: vals[i], color: STAGE_COLORS[i],
+    pct: (vals[0]?Math.round(vals[i]/vals[0]*100):0)+'%'
+  })));
 
   // "by X" grouping: collapses to the selected value when X itself is filtered.
   // When no OTHER dimension is filtered, use the report's exact static figures;
@@ -1421,13 +1509,25 @@ function renderTrade(){
   const repData=groupBy('salesRep', [...tradeRepPopNamed.map(p=>p.k),'Unassigned'], tradeByRepStatic);
   const principalData=groupBy('principal', tradePrincipalPopRaw.map(p=>p.k), tradeByPrincipalStatic);
 
+  // Legend for the two waterfall charts (static — stage labels/colors don't change)
+  const legendHtml = STAGE_LABELS.map((s,i)=>`<span class="wf-legend-item"><span class="wf-legend-swatch" style="background:${STAGE_COLORS[i]}"></span>${s}</span>`).join('');
+  document.getElementById('trade-region-legend').innerHTML = legendHtml;
+  document.getElementById('trade-sg-legend').innerHTML = legendHtml;
+
   function renderWaterfall(containerId, data){
     const el=document.getElementById(containerId);
+    // Shared scale across all rows in this chart: each stage segment's width is
+    // proportional to its own absolute value, stacked left-to-right (Hunting -> Settlement).
+    // Rows with a smaller total simply produce a shorter bar (not normalized to 100%),
+    // so bar length is comparable across regions/sales groups.
+    const rowTotals = data.map(r=>r.v.reduce((a,b)=>a+b,0));
+    const scaleMax = Math.max(...rowTotals, 1);
     el.innerHTML=data.map(r=>{
-      const scaleMax=Math.max(...r.v,1);
-      const bars=STAGE_LABELS.map((s,i)=>`<div class="wf-bar" style="width:${Math.max(2,r.v[i]/scaleMax*100)}%;background:${STAGE_COLORS[i]};z-index:${i+1}"></div>`).join('');
-      const tags=STAGE_LABELS.map((s,i)=>`<span class="wf-val-tag" style="background:${STAGE_COLORS[i]}22;color:${STAGE_COLORS[i]}" title="${s}">${numFmt(r.v[i])}</span>`).join('');
-      return `<div class="wf-row"><div class="wf-label">${r.k}</div><div class="wf-body"><div class="wf-bar-wrap">${bars}</div><div class="wf-values">${tags}</div></div></div>`;
+      const bars=STAGE_LABELS.map((s,i)=>{
+        const pct = r.v[i]/scaleMax*100;
+        return `<div class="wf-seg" style="width:${pct}%;background:${STAGE_COLORS[i]}" title="${s}: ${numFmt(r.v[i])}"><span class="wf-bar-label">${numFmt(r.v[i])}</span></div>`;
+      }).join('');
+      return `<div class="wf-row"><div class="wf-label">${r.k}</div><div class="wf-body"><div class="wf-bar-wrap">${bars}</div></div></div>`;
     }).join('');
   }
   renderWaterfall('trade-regionChart', regionData);
@@ -1480,6 +1580,166 @@ function buildTradeFilterBar(){
 }
 buildTradeFilterBar();
 renderTrade();
+
+/* ══════════════════════════════════════════════════
+   PAGE 5 — PROGRAM PARTICIPATION (Outlet ↔ CTKM)
+   Synthetic outlet-level enrollment built on top of the same
+   240-outlet universe used by Trade Program Execution, so
+   per-program participant counts reconcile with the hunting-list
+   sizes shown there (60/50/45/45/40).
+══════════════════════════════════════════════════ */
+const CTKM_COLORS=['#C8102E','#f2841f','#2f6fed','#2e8b45','#8b5cf6'];
+const CLASS_LEVELS=['A','B','C','D'];
+const CLASS_COLORS={A:'#2e8b45',B:'#2f6fed',C:'#e5942a',D:'#8a8884'};
+// Pareto-ish split of the 240 outlets across classification tiers
+const CLASS_COUNTS={A:36,B:60,C:72,D:72}; // sums to 240
+
+let ctkmOutlets=[];
+(function buildCtkmData(){
+  const rnd=seededRandom(77);
+  function shuffleIdx(n,rndFn){
+    const a=Array.from({length:n},(_,i)=>i);
+    for(let i=a.length-1;i>0;i--){const j=Math.floor(rndFn()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+    return a;
+  }
+  // Outlet codes + region/salesGroup reused 1:1 from the trade joint dataset (same 240 outlets)
+  const classArr=[];
+  CLASS_LEVELS.forEach(c=>{for(let i=0;i<CLASS_COUNTS[c];i++)classArr.push(c)});
+  const classShuffled=shuffleIdx(classArr.length, seededRandom(88)).map(i=>classArr[i]);
+
+  ctkmOutlets = tradeJointData.map((r,i)=>({
+    code:'OL-'+String(i+1).padStart(4,'0'),
+    region:r.region, salesGroup:r.salesGroup,
+    classification:classShuffled[i],
+    programs:[]
+  }));
+
+  // For each program, draw a random hunting-list-sized sample of outlets (with overlap
+  // allowed across programs — an outlet can be in more than one CTKM at once).
+  tradePrograms.forEach((p,pi)=>{
+    const order=shuffleIdx(TOTAL_OUTLETS, seededRandom(100+pi));
+    order.slice(0,p.hunting).forEach(idx=>ctkmOutlets[idx].programs.push(p.name));
+  });
+})();
+
+function ctkmActiveFilters(){
+  return {
+    classification:document.getElementById('ctkm-f-class').value,
+    outlet:document.getElementById('ctkm-f-outlet').value,
+    program:document.getElementById('ctkm-f-program').value
+  };
+}
+function ctkmMatch(o,f){
+  return (f.classification==='All'||o.classification===f.classification)
+    && (f.outlet==='All'||o.code===f.outlet)
+    && (f.program==='All'||o.programs.includes(f.program));
+}
+function resetCtkmFilters(){
+  document.getElementById('ctkm-f-class').value='All';
+  document.getElementById('ctkm-f-outlet').value='All';
+  document.getElementById('ctkm-f-program').value='All';
+  renderCtkm();
+}
+function buildCtkmFilterBar(){
+  const el=document.getElementById('ctkm-filterbar');
+  const outletOptions=['All',...ctkmOutlets.map(o=>o.code)];
+  el.innerHTML=
+    buildFilterGroup(1,'Xếp Loại','ctkm-f-class',['All',...CLASS_LEVELS])+
+    buildFilterGroup(2,'Outlet','ctkm-f-outlet',outletOptions)+
+    buildFilterGroup(3,'CTKM','ctkm-f-program',['All',...tradePrograms.map(p=>p.name)])+
+    `<button class="reset-btn" onclick="resetCtkmFilters()">↺<span>Reset</span></button>`;
+  el.querySelectorAll('select').forEach(s=>s.addEventListener('change',renderCtkm));
+}
+
+let ctkmCharts={};
+function renderCtkm(){
+  const f=ctkmActiveFilters();
+  const scopeNote=document.getElementById('ctkm-scope');
+  const parts=[];
+  if(f.classification!=='All') parts.push('Xếp Loại = '+f.classification);
+  if(f.outlet!=='All') parts.push('Outlet = '+f.outlet);
+  if(f.program!=='All') parts.push('CTKM = '+f.program);
+  if(parts.length){scopeNote.style.display='inline-flex';scopeNote.innerHTML=`Showing: ${parts.join(' · ')} <button onclick="resetCtkmFilters()">clear</button>`;}
+  else{scopeNote.style.display='none';}
+
+  const filtered=ctkmOutlets.filter(o=>ctkmMatch(o,f));
+
+  // KPIs
+  document.getElementById('ctkm-kpi-outlets').textContent=numFmt(filtered.length);
+  const programsInScope=new Set();
+  filtered.forEach(o=>o.programs.forEach(p=>programsInScope.add(p)));
+  document.getElementById('ctkm-kpi-programs').textContent=numFmt(programsInScope.size);
+  const avgProg = filtered.length ? (filtered.reduce((s,o)=>s+o.programs.length,0)/filtered.length) : 0;
+  document.getElementById('ctkm-kpi-avg').textContent=avgProg.toFixed(1);
+
+  // Chart 1 — outlet count per CTKM (classification + outlet filters apply; the
+  // selected program, if any, is highlighted rather than hiding the other bars)
+  const byClassOutletFilter=o=>(f.classification==='All'||o.classification===f.classification)&&(f.outlet==='All'||o.code===f.outlet);
+  const baseForPrograms=ctkmOutlets.filter(byClassOutletFilter);
+  const programCounts=tradePrograms.map(p=>baseForPrograms.filter(o=>o.programs.includes(p.name)).length);
+  const programBg=tradePrograms.map((p,i)=> f.program==='All'||f.program===p.name ? CTKM_COLORS[i] : 'rgba(0,0,0,.12)');
+
+  if(ctkmCharts.byProgram) ctkmCharts.byProgram.destroy();
+  ctkmCharts.byProgram=new Chart(document.getElementById('ctkm-byProgramChart'),{
+    type:'bar',
+    data:{labels:tradePrograms.map(p=>p.name),datasets:[{data:programCounts,backgroundColor:programBg,borderRadius:4,borderSkipped:false}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,onClick:(evt,els)=>{
+        if(!els.length) return;
+        const p=tradePrograms[els[0].index];
+        const sel=document.getElementById('ctkm-f-program');
+        sel.value = (sel.value===p.name) ? 'All' : p.name;
+        renderCtkm();
+      },
+      onHover:(evt,els)=>{evt.native.target.style.cursor=els.length?'pointer':'default';},
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${numFmt(ctx.raw)} outlets`}}},
+      scales:{x:{beginAtZero:true,grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10}}},y:{grid:{display:false},ticks:{font:{size:10}}}}}
+  });
+
+  // Chart 2 — distribution of "how many CTKM per outlet" (0 / 1 / 2 / 3+), respecting
+  // classification + program filters (outlet filter would trivially collapse this, so
+  // we deliberately ignore it here to keep the distribution meaningful)
+  const byClassProgramFilter=o=>(f.classification==='All'||o.classification===f.classification)&&(f.program==='All'||o.programs.includes(f.program));
+  const baseForDist=ctkmOutlets.filter(byClassProgramFilter);
+  const buckets=[0,0,0,0]; // 0,1,2,3+
+  baseForDist.forEach(o=>{const n=o.programs.length; buckets[Math.min(n,3)]++;});
+
+  if(ctkmCharts.byOutlet) ctkmCharts.byOutlet.destroy();
+  ctkmCharts.byOutlet=new Chart(document.getElementById('ctkm-byOutletChart'),{
+    type:'bar',
+    data:{labels:['0 CTKM','1 CTKM','2 CTKM','3+ CTKM'],datasets:[{data:buckets,backgroundColor:'#2f6fed',borderRadius:4,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${numFmt(ctx.raw)} outlets`}}},
+      scales:{y:{beginAtZero:true,grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:11}}}}}
+  });
+
+  // Chart 3 — outlet count per classification (outlet + program filters apply)
+  const byOutletProgramFilter=o=>(f.outlet==='All'||o.code===f.outlet)&&(f.program==='All'||o.programs.includes(f.program));
+  const baseForClass=ctkmOutlets.filter(byOutletProgramFilter);
+  const classCounts=CLASS_LEVELS.map(c=>baseForClass.filter(o=>o.classification===c).length);
+  const classBg=CLASS_LEVELS.map((c,i)=> f.classification==='All'||f.classification===c ? CLASS_COLORS[c] : 'rgba(0,0,0,.12)');
+
+  if(ctkmCharts.byClass) ctkmCharts.byClass.destroy();
+  ctkmCharts.byClass=new Chart(document.getElementById('ctkm-byClassChart'),{
+    type:'bar',
+    data:{labels:CLASS_LEVELS.map(c=>'Loại '+c),datasets:[{data:classCounts,backgroundColor:classBg,borderRadius:4,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${numFmt(ctx.raw)} outlets`}}},
+      scales:{y:{beginAtZero:true,grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:11}}}}}
+  });
+
+  // Table 1 — Outlet → CTKM
+  const outletTbl=document.getElementById('ctkm-outletTbl');
+  let oh=`<tr><th>#</th><th>Outlet</th><th>Xếp Loại</th><th>Region</th><th>Sales Group</th><th class="r">Số CTKM</th><th>CTKM Áp Dụng</th></tr>`;
+  const programColorMap=Object.fromEntries(tradePrograms.map((p,i)=>[p.name,CTKM_COLORS[i]]));
+  filtered.slice(0,300).forEach((o,i)=>{
+    const tags = o.programs.length
+      ? o.programs.map(p=>`<span class="ctkm-tag" style="background:${programColorMap[p]}">${p}</span>`).join('')
+      : `<span style="color:var(--text-3)">— none —</span>`;
+    oh+=`<tr><td>${i+1}</td><td style="font-weight:600">${o.code}</td><td><span class="ctkm-tag" style="background:${CLASS_COLORS[o.classification]}">${o.classification}</span></td><td>${o.region}</td><td>${o.salesGroup}</td><td class="r">${o.programs.length}</td><td>${tags}</td></tr>`;
+  });
+  if(!filtered.length) oh+=`<tr><td colspan="7" style="text-align:center;color:var(--text-3);padding:16px">No outlets match the selected filters.</td></tr>`;
+  outletTbl.innerHTML=oh;
+}
+buildCtkmFilterBar();
+renderCtkm();
 
 /* ══════════════════════════════════════
    BOM DATA (was: distribution / Tab 1)
@@ -1682,7 +1942,7 @@ function renderBom(){
 
   const smRows=rows.filter(r=>r.seg==='Supermarket'&&r.fee>0).sort((a,b)=>b.fee-a.fee);
   if(bomCharts.fee) bomCharts.fee.destroy();
-  bomCharts.fee=new Chart(document.getElementById('feeChart'),{type:'bar',data:{labels:smRows.map(o=>o.name),datasets:[{data:smRows.map(o=>+(o.fee/1e6).toFixed(1)),backgroundColor:'#C8102E',borderRadius:4,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.raw}M VND`}}},scales:{x:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{font:{size:10},callback:v=>v+'M'}},y:{grid:{display:false},ticks:{font:{size:10}}}}}});
+  bomCharts.fee=new Chart(document.getElementById('feeChart'),{type:'bar',data:{labels:smRows.map(o=>o.name),datasets:[{data:smRows.map(o=>+(o.fee/1e6).toFixed(1)),backgroundColor:'#2e8b45',borderRadius:4,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.raw}M VND`}}},scales:{x:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{font:{size:10},callback:v=>v+'M'}},y:{grid:{display:false},ticks:{font:{size:10}}}}}});
 
   renderHM();
 }
@@ -1897,11 +2157,11 @@ function syncBodScope(){
   function heatColor(v,max){
     if(!v)return{bg:'#f4f4f2',tx:'#9a9793'};
     const pct=v/max;
-    if(pct<.2)return{bg:'#fbe7ea',tx:'#8c0b20'};
-    if(pct<.4)return{bg:'#f2a3ac',tx:'#8c0b20'};
-    if(pct<.6)return{bg:'#C8102E',tx:'#fff'};
-    if(pct<.8)return{bg:'#a30d24',tx:'#fff'};
-    return{bg:'#8c0b20',tx:'#fff'};
+    if(pct<.2)return{bg:'#e6f4e9',tx:'#1c5a2c'};
+    if(pct<.4)return{bg:'#a8d9b4',tx:'#1c5a2c'};
+    if(pct<.6)return{bg:'#2e8b45',tx:'#fff'};
+    if(pct<.8)return{bg:'#227036',tx:'#fff'};
+    return{bg:'#1c5a2c',tx:'#fff'};
   }
 
   let h='<thead><tr><th class="left">Mfg. Partner</th>';
