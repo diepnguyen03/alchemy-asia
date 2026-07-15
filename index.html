@@ -1,0 +1,1948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MT Universe — Analytics Suite</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{
+  --bg:#f4f4f2;--surface:#fff;--surface2:#f7f6f4;
+  --border:rgba(0,0,0,.09);--border-md:rgba(0,0,0,.16);
+  --text:#181818;--text-2:#666360;--text-3:#9a9793;
+  --radius-md:8px;--radius-lg:12px;
+
+  --red:#C8102E;--red-d:#8c0b20;--red-l:#fbe7ea;
+  --navy:#14161f;--navy-2:#1d2030;
+  --green:#2e8b45;--green-l:#e6f4e9;--green-d:#1c5a2c;
+  --amber:#e5942a;--amber-l:#fdf0dd;--amber-d:#8a5711;
+  --danger:#e0433c;--danger-l:#fbe6e4;--danger-d:#8f231e;
+  --blue:#2f6fed;--blue-l:#e8eefd;--blue-d:#1c47a3;
+  --purple:#8b5cf6;--purple-l:#efe9fe;--purple-d:#4c2f96;
+  --orange:#f2841f;--orange-l:#fdecdc;--orange-d:#8a4c11;
+  --gray:#8a8884;--gray-l:#f0efec;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:13px;line-height:1.5}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+
+/* ── Header ── */
+.header{background:var(--surface);border-bottom:2px solid var(--red);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:400}
+.logo-mark{width:30px;height:30px;background:var(--red);border-radius:6px;display:flex;align-items:center;justify-content:center}
+.logo-mark span{color:#fff;font-size:12px;font-weight:700;letter-spacing:-.5px}
+.hdr-left{display:flex;align-items:center;gap:12px}
+.hdr-right{display:flex;align-items:center;gap:8px}
+.hdr-title{font-size:15px;font-weight:600;letter-spacing:-.01em}
+.hdr-title b{color:var(--red)}
+.badge{font-size:10px;padding:3px 9px;border-radius:20px;font-weight:600}
+
+/* ── Top-level section nav ── */
+.top-nav{background:var(--navy);padding:0 24px;display:flex;position:sticky;top:56px;z-index:390}
+.top-nav-btn{font-size:12.5px;font-weight:600;color:rgba(255,255,255,.55);padding:12px 20px;border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;transition:all .15s;font-family:inherit;letter-spacing:.02em}
+.top-nav-btn:hover{color:rgba(255,255,255,.85)}
+.top-nav-btn.active{color:#fff;border-bottom-color:var(--red)}
+
+/* ── Sub-tab nav ── */
+.tab-nav{background:var(--surface);border-bottom:.5px solid var(--border-md);padding:0 24px;display:flex;position:sticky;top:100px;z-index:200;overflow-x:auto}
+.tab-btn{font-size:12px;font-weight:500;color:var(--text-3);padding:10px 16px;border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;font-family:inherit;white-space:nowrap}
+.tab-btn:hover{color:var(--text-2)}
+.tab-btn.active{color:var(--red);border-bottom-color:var(--red);font-weight:600}
+.tab-panel{display:none}.tab-panel.active{display:block}
+.top-section{display:none}.top-section.active{display:block}
+.main{padding:18px 24px 40px;max-width:1560px;margin:0 auto}
+
+/* ── Section label ── */
+.section-label{font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;margin-top:20px}
+.section-label:first-child{margin-top:0}
+
+/* ── Filter bar (numbered, Alchemy-style) ── */
+.filterbar{display:flex;gap:10px;flex-wrap:wrap;align-items:stretch;margin-bottom:16px}
+.fgroup{background:var(--surface);border:1px solid var(--red);border-radius:var(--radius-md);padding:8px 12px;min-width:132px;position:relative}
+.fgroup-label{display:flex;align-items:center;gap:6px;font-size:9.5px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.fnum{width:16px;height:16px;border-radius:50%;background:var(--red);color:#fff;font-size:9px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.fgroup select{font-family:inherit;font-size:11px;border:none;background:transparent;color:var(--text);cursor:pointer;outline:none;width:100%}
+.fgroup-row{display:flex;gap:10px}
+.fgroup-row .fmini{display:flex;flex-direction:column;gap:2px}
+.fgroup-row .fmini label{font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.03em}
+.fgroup-row .fmini select{font-size:11px}
+.reset-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:1px solid var(--border-md);border-radius:var(--radius-md);background:var(--surface);color:var(--text-2);font-size:9.5px;font-weight:600;cursor:pointer;padding:6px 14px;font-family:inherit}
+.reset-btn:hover{background:var(--surface2);color:var(--red);border-color:var(--red)}
+.scope-note{font-size:11px;color:var(--red);background:var(--red-l);border-radius:6px;padding:5px 10px;display:inline-flex;align-items:center;gap:6px;margin-bottom:12px;font-weight:600}
+.scope-note button{border:none;background:none;color:var(--red-d);font-weight:700;cursor:pointer;font-size:11px;text-decoration:underline;font-family:inherit}
+
+/* ── KPI band ── */
+.kpi-band{background:var(--surface);border:.5px solid var(--border);border-radius:var(--radius-lg);padding:14px 18px;margin-bottom:4px;display:grid;gap:0}
+.kpi-band.cols5{grid-template-columns:repeat(5,1fr)}
+.kpi-band.cols4{grid-template-columns:repeat(4,1fr)}
+.kpi-band.cols3{grid-template-columns:repeat(3,1fr)}
+.kpi{display:flex;align-items:center;gap:12px;padding:6px 14px;border-right:.5px solid var(--border)}
+.kpi:last-child{border-right:none}
+.kpi-icon{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.kpi-icon svg{width:20px;height:20px}
+.kpi-val{font-size:22px;font-weight:700;line-height:1;color:var(--text)}
+.kpi-val.red{color:var(--red)}
+.kpi-label{font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;font-weight:600}
+.kpi-sub{font-size:10.5px;color:var(--text-3);margin-top:3px}
+
+/* ── Panels ── */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px}
+.panel{background:var(--surface);border:.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.panel-hdr{padding:9px 16px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.04em;display:flex;align-items:center;justify-content:space-between}
+.panel-hdr.red{background:var(--red)}
+.panel-hdr.dark{background:var(--navy)}
+.panel-body{padding:16px 18px}
+.panel-sub{font-size:11px;color:var(--text-2);margin-bottom:8px}
+
+/* ── Bar chart threshold legend ── */
+.thr-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:10.5px;color:var(--text-2);margin-top:8px;justify-content:center}
+.thr-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px}
+
+/* ── Funnel ── */
+.funnel-wrap{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0}
+.funnel-tier{color:#fff;text-align:center;padding:16px 0;font-weight:600;position:relative}
+.funnel-tier .ft-label{font-size:11px;text-transform:uppercase;letter-spacing:.05em;opacity:.85}
+.funnel-tier .ft-val{font-size:26px;font-weight:700;line-height:1.2}
+.funnel-tier .ft-sub{font-size:11px;opacity:.85}
+.funnel-arrow-row{display:flex;align-items:center;justify-content:center;gap:8px;font-size:11px;color:var(--text-2);font-weight:600;margin-top:8px}
+
+/* ── Pipeline steps ── */
+.pipeline{display:flex;align-items:stretch;gap:0;margin-bottom:10px}
+.pipe-step{flex:1;text-align:center;padding:14px 8px;color:#fff;position:relative;font-weight:600}
+.pipe-step::after{content:'';position:absolute;right:-1px;top:0;bottom:0;width:0;border-top:22px solid transparent;border-bottom:22px solid transparent;border-left:14px solid var(--pipe-color,#fff);z-index:2}
+.pipe-step:last-child::after{display:none}
+.pipe-step .ps-label{font-size:10px;text-transform:uppercase;letter-spacing:.03em;opacity:.9}
+.pipe-num-row{display:flex;text-align:center;margin-bottom:4px}
+.pipe-num-row div{flex:1;font-size:20px;font-weight:700}
+.pipe-caption{text-align:center;font-size:11px;color:var(--text-3);font-weight:600;letter-spacing:.03em;text-transform:uppercase}
+
+/* ── Gauge ── */
+.gauge-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center}
+.gauge-val{font-size:26px;font-weight:700;margin-top:-38px}
+.gauge-cap{font-size:11px;color:var(--text-3);margin-top:2px}
+
+/* ── Tables ── */
+table.data-tbl{width:100%;border-collapse:collapse;font-size:11px}
+.data-tbl th{background:var(--surface2);padding:8px 10px;font-weight:700;color:var(--text-2);font-size:9.5px;text-transform:uppercase;letter-spacing:.03em;text-align:left;border-bottom:1px solid var(--border-md);white-space:nowrap}
+.data-tbl th.r{text-align:right}
+.data-tbl td{padding:7px 10px;border-bottom:.5px solid var(--border);vertical-align:middle;white-space:nowrap}
+.data-tbl td.r{text-align:right;font-variant-numeric:tabular-nums}
+.data-tbl tr:last-child td{border-bottom:none}
+.data-tbl tr.total-row td{background:var(--surface2);font-weight:700;border-top:1px solid var(--border-md)}
+.data-tbl tr.hl td{background:var(--red-l)}
+.data-tbl tr:hover td{background:var(--surface2)}
+.rate-pill{display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700}
+.scroll-x{overflow-x:auto}
+
+/* ── mc / heatmap kept from source, retinted ── */
+.mc-row{display:grid;gap:10px;margin-bottom:4px}
+.mc{background:var(--surface);border:.5px solid var(--border);border-radius:var(--radius-lg);padding:13px 16px;border-left:3px solid}
+.mc-label{font-size:10px;color:var(--text-3);margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em;font-weight:600}
+.mc-val{font-size:24px;font-weight:700;line-height:1}
+.mc-sub{font-size:10px;color:var(--text-3);margin-top:4px}
+.card{background:var(--surface);border:.5px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px}
+.card-title{font-size:11px;font-weight:700;color:var(--text-2);margin-bottom:12px;text-transform:uppercase;letter-spacing:.05em}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.chart-legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px;font-size:11px;color:var(--text-2)}
+.leg{display:flex;align-items:center;gap:5px}
+.leg-sq{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.hm-card{background:var(--surface);border:.5px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:12px}
+.hm-legend{display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--text-2);align-items:center}
+.hm-leg{display:flex;align-items:center;gap:4px}
+.hm-sq{width:11px;height:11px;border-radius:2px;flex-shrink:0}
+.scroll-wrap{overflow-x:auto;overflow-y:auto;border:.5px solid var(--border);border-radius:var(--radius-md)}
+.scroll-wrap.hm{max-height:440px}
+table{border-collapse:collapse;font-size:11px;min-width:100%}
+.seg-btn{font-size:10px;padding:3px 9px;border:.5px solid var(--border-md);border-radius:20px;background:var(--surface);color:var(--text-2);cursor:pointer;transition:all .15s;font-family:inherit}
+.seg-btn:hover{background:var(--surface2)}
+.seg-btn.active{background:var(--red);color:#fff;border-color:var(--red)}
+thead.chdr th{position:sticky;top:0;background:var(--surface2);z-index:10;padding:4px 2px;font-weight:600;color:var(--text-2);white-space:nowrap;border-bottom:1px solid var(--border-md);min-width:48px;max-width:48px;text-align:center;vertical-align:bottom}
+thead.chdr th.f1{position:sticky;left:0;z-index:20;min-width:72px;max-width:72px;text-align:left;padding-left:10px}
+thead.chdr th.f2{position:sticky;left:72px;z-index:20;min-width:150px;max-width:150px;text-align:left;padding-left:6px}
+thead.chdr th.f3{position:sticky;left:222px;z-index:20;min-width:68px;max-width:68px;text-align:right;padding-right:10px}
+.prod-label{writing-mode:vertical-rl;transform:rotate(180deg);font-size:10px;display:inline-block;max-height:86px;overflow:hidden;text-overflow:ellipsis;color:var(--text-2)}
+tr.dr td{padding:3px 2px;text-align:center;border-bottom:.5px solid var(--border)}
+tr.dr td.f1{position:sticky;left:0;z-index:5;background:var(--surface);text-align:left;padding-left:10px;min-width:72px;max-width:72px;border-right:.5px solid var(--border);white-space:nowrap}
+tr.dr td.f2{position:sticky;left:72px;z-index:5;background:var(--surface);min-width:150px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border-right:.5px solid var(--border);padding-left:6px;font-weight:600}
+tr.dr td.f3{position:sticky;left:222px;z-index:5;background:var(--surface);text-align:right;padding-right:10px;min-width:68px;max-width:68px;border-right:.5px solid var(--border-md);white-space:nowrap;color:var(--text-2)}
+tr.dr:hover td{background:#f5f4f0!important}
+tr.dr:last-child td{border-bottom:none}
+.cell{width:20px;height:20px;border-radius:3px;display:inline-block;vertical-align:middle}
+.c1{background:#C8102E}.c2{background:#8f8d88}.crl{background:#2f6fed}.cbl{background:#e0433c}.cl{background:#b9cef1}.crj{background:#e5942a}.c0{background:transparent;border:.5px solid var(--border-md)}
+.seg-tag{display:inline-block;font-size:9px;padding:1px 5px;border-radius:8px;font-weight:600;white-space:nowrap}
+.bod-hm-wrap{overflow-x:auto;overflow-y:auto;max-height:380px;border:.5px solid var(--border);border-radius:var(--radius-md)}
+.bhm-tbl{border-collapse:collapse;font-size:11px;min-width:100%}
+.bhm-tbl th{position:sticky;top:0;background:var(--surface2);z-index:10;padding:7px 12px;font-weight:600;color:var(--text-2);text-align:center;border-bottom:1px solid var(--border-md);white-space:nowrap;font-size:10px}
+.bhm-tbl th.left{text-align:left;position:sticky;left:0;z-index:20}
+.bhm-tbl td{padding:6px 12px;border-bottom:.5px solid var(--border);text-align:center;font-size:11px}
+.bhm-tbl td.left{position:sticky;left:0;background:var(--surface);font-weight:600;text-align:left;border-right:.5px solid var(--border);white-space:nowrap;z-index:5}
+.bhm-tbl tr:last-child td{border-bottom:none}
+.bhm-tbl tr:hover td{background:var(--surface2)!important}
+.heat-cell{display:inline-block;min-width:52px;padding:3px 6px;border-radius:4px;font-weight:600;font-size:11px;text-align:center}
+.status-pill{display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;white-space:nowrap}
+.method-tag{display:inline-block;font-size:10px;padding:2px 7px;border-radius:4px;font-weight:600;white-space:nowrap;border:.5px solid}
+.pbar-wrap{background:var(--surface2);border-radius:3px;height:5px;width:72px;display:inline-block;vertical-align:middle;overflow:hidden}
+.pbar-fill{height:100%;border-radius:3px}
+.bod-tbl{width:100%;border-collapse:collapse;font-size:11px}
+.bod-tbl th{background:var(--surface2);padding:8px 12px;font-weight:600;color:var(--text-2);font-size:10px;text-transform:uppercase;letter-spacing:.04em;text-align:left;border-bottom:1px solid var(--border-md);white-space:nowrap;position:sticky;top:0;z-index:5}
+.bod-tbl th.r{text-align:right}
+.bod-tbl td{padding:8px 12px;border-bottom:.5px solid var(--border);vertical-align:middle}
+.bod-tbl td.r{text-align:right;font-variant-numeric:tabular-nums}
+.bod-tbl tr:last-child td{border-bottom:none}
+.bod-tbl tr:hover td{background:var(--surface2)}
+.bod-tbl tr.total-row td{background:var(--surface2);font-weight:600;border-top:1px solid var(--border-md)}
+
+#tip{position:fixed;background:var(--surface);border:.5px solid var(--border-md);border-radius:var(--radius-md);padding:8px 10px;font-size:11px;pointer-events:none;z-index:9999;display:none;max-width:230px;box-shadow:0 4px 16px rgba(0,0,0,.1)}
+#tip b{font-weight:700}
+.tip-sub{color:var(--text-2);margin-top:2px}
+
+@media (max-width:1100px){
+  .kpi-band.cols5,.kpi-band.cols4{grid-template-columns:repeat(2,1fr)}
+  .kpi{border-right:none;border-bottom:.5px solid var(--border)}
+  .grid2,.grid3,.grid4,.g2{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<h2 class="sr-only">MT Universe Analytics Suite — Overview and BOM/BOD Manufacturing Partner Report</h2>
+
+<!-- Header -->
+<div class="header">
+  <div class="hdr-left">
+    <div class="logo-mark"><span>MT</span></div>
+    <span class="hdr-title">MT Universe <b>Analytics</b></span>
+  </div>
+  <div class="hdr-right">
+    <span class="badge" style="background:var(--red-l);color:var(--red-d)">39 Outlets</span>
+    <span class="badge" style="background:var(--purple-l);color:var(--purple-d)">5 Mfg. Partners</span>
+    <span class="badge" style="background:var(--surface2);color:var(--text-3)">2026 YTD</span>
+  </div>
+</div>
+
+<!-- Top-level section nav -->
+<div class="top-nav">
+  <button class="top-nav-btn active" onclick="switchTop('overview',this)">Overview</button>
+  <button class="top-nav-btn" onclick="switchTop('bombod',this)">BOM &amp; BOD Report</button>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     TOP SECTION 1 — OVERVIEW
+══════════════════════════════════════════════════ -->
+<div id="top-overview" class="top-section active">
+
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('ov-universe',this,'overview')">Universe Management</button>
+    <button class="tab-btn" onclick="switchTab('ov-depth',this,'overview')">Distribution Depth</button>
+    <button class="tab-btn" onclick="switchTab('ov-field',this,'overview')">Field Execution</button>
+    <button class="tab-btn" onclick="switchTab('ov-trade',this,'overview')">Trade Program Execution</button>
+  </div>
+
+  <!-- ── PAGE 1: UNIVERSE MANAGEMENT ── -->
+  <div id="tab-ov-universe" class="tab-panel active"><div class="main">
+    <div class="section-label">Universe Management</div>
+    <div class="filterbar" id="uni-filterbar"></div>
+    <div class="kpi-band cols3" style="margin-bottom:16px">
+      <div class="kpi"><div class="kpi-icon" style="background:var(--red-l)"><svg viewBox="0 0 24 24" fill="none" stroke="#C8102E" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div><div class="kpi-label">Total Universe</div><div class="kpi-val red" id="uni-kpi-total">—</div><div class="kpi-sub">outlets</div></div></div>
+      <div class="kpi"><div class="kpi-icon" style="background:var(--gray-l)"><svg viewBox="0 0 24 24" fill="none" stroke="#8a8884" stroke-width="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg></div><div><div class="kpi-label">Lead</div><div class="kpi-val" id="uni-kpi-lead">—</div><div class="kpi-sub" id="uni-kpi-lead-pct">—</div></div></div>
+      <div class="kpi"><div class="kpi-icon" style="background:var(--red-l)"><svg viewBox="0 0 24 24" fill="none" stroke="#C8102E" stroke-width="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg></div><div><div class="kpi-label">Customer</div><div class="kpi-val red" id="uni-kpi-cust">—</div><div class="kpi-sub" id="uni-kpi-cust-pct">—</div></div></div>
+    </div>
+    <div class="grid3">
+      <div class="panel" style="grid-column:span 1">
+        <div class="panel-hdr red">Funnel Overview</div>
+        <div class="panel-body">
+          <div class="funnel-wrap" id="uni-funnel"></div>
+          <div class="funnel-arrow-row"><span>Lead</span>→<span>Prospect</span>→<span>Customer</span></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr dark">Key Summary</div>
+        <div class="panel-body"><table class="data-tbl" id="uni-summary-tbl"></table></div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr dark">Coverage Status <span style="font-weight:400;font-size:9px;opacity:.8">(Customers only)</span></div>
+        <div class="panel-body" id="uni-coverage"></div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="panel">
+        <div class="panel-hdr dark">Customer Breakdown by Classification</div>
+        <div class="panel-body" style="display:flex;align-items:center;gap:20px">
+          <div style="position:relative;width:180px;height:180px;flex-shrink:0"><canvas id="uni-classDonut"></canvas></div>
+          <div style="flex:1" id="uni-classLegend"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr dark">Universe by Region &amp; Stage</div>
+        <div class="panel-body"><div style="position:relative;width:100%;height:230px"><canvas id="uni-regionChart"></canvas></div></div>
+      </div>
+    </div>
+  </div></div>
+
+  <!-- ── PAGE 2: DISTRIBUTION DEPTH ── -->
+  <div id="tab-ov-depth" class="tab-panel"><div class="main">
+    <div class="section-label">Distribution Depth <span style="font-weight:400;text-transform:none;color:var(--text-2)">— market coverage by portfolio distribution (depth)</span></div>
+    <div class="filterbar" id="depth-filterbar"></div>
+    <div id="depth-scope" class="scope-note" style="display:none"></div>
+    <div class="grid4">
+      <div class="panel">
+        <div class="panel-hdr red">Depth Overview</div>
+        <div class="panel-body">
+          <div class="kpi" style="padding:6px 0;border:none"><div class="kpi-icon" style="background:var(--red-l)"><svg viewBox="0 0 24 24" fill="none" stroke="#C8102E" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><div><div class="kpi-label">Total Customers</div><div class="kpi-val red" id="depth-kpi-cust">—</div></div></div>
+          <div class="kpi" style="padding:6px 0;border:none"><div class="kpi-icon" style="background:var(--blue-l)"><svg viewBox="0 0 24 24" fill="none" stroke="#2f6fed" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div><div><div class="kpi-label">Total Products (Portfolio)</div><div class="kpi-val" id="depth-kpi-prod">251</div></div></div>
+          <div class="kpi" style="padding:6px 0;border:none"><div class="kpi-icon" style="background:var(--amber-l)"><svg viewBox="0 0 24 24" fill="none" stroke="#e5942a" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div><div><div class="kpi-label">Average Depth (pts/outlet)</div><div class="kpi-val" id="depth-kpi-avg">—</div><div class="kpi-sub" id="depth-kpi-avgpct">—</div></div></div>
+          <div class="kpi" style="padding:6px 0;border:none"><div class="kpi-icon" style="background:var(--green-l)"><svg viewBox="0 0 24 24" fill="none" stroke="#2e8b45" stroke-width="2"><path d="M4 22h16M4 22V10l8-6 8 6v12"/></svg></div><div><div class="kpi-label">Target Depth (pts/outlet)</div><div class="kpi-val" id="depth-kpi-target">156</div><div class="kpi-sub">60%</div></div></div>
+          <div style="margin-top:6px"><div id="depth-gauge" class="gauge-wrap"></div></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr dark">By Region</div>
+        <div class="panel-body"><div class="panel-sub">Average Depth (Points / Outlet)</div><div style="position:relative;width:100%;height:190px"><canvas id="depth-regionChart"></canvas></div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr dark">By Channel</div>
+        <div class="panel-body"><div class="panel-sub">Average Depth (Points / Outlet)</div><div style="position:relative;width:100%;height:190px"><canvas id="depth-channelChart"></canvas></div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr dark">By Sales Group</div>
+        <div class="panel-body"><div class="panel-sub">Average Depth (Points / Outlet)</div><div style="position:relative;width:100%;height:190px"><canvas id="depth-sgChart"></canvas></div></div>
+      </div>
+    </div>
+    <div class="grid3">
+      <div class="panel">
+        <div class="panel-hdr dark">By Sales Rep.</div>
+        <div class="panel-body"><div class="panel-sub">Average Depth (Points / Outlet)</div><div style="position:relative;width:100%;height:190px"><canvas id="depth-repChart"></canvas></div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr dark">By Principal</div>
+        <div class="panel-body"><div class="panel-sub">Average Depth (Points / Outlet)</div><div style="position:relative;width:100%;height:190px"><canvas id="depth-principalChart"></canvas></div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr dark">By Brand</div>
+        <div class="panel-body"><div class="panel-sub">Average Depth (Points / Outlet)</div><div style="position:relative;width:100%;height:190px"><canvas id="depth-brandChart"></canvas></div></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-hdr dark">By Product (Top 10) <span style="font-weight:400;font-size:9px;opacity:.8">— filter with Category / Principal / Brand / Product above</span></div>
+      <div class="panel-body"><div class="scroll-x"><table class="data-tbl" id="depth-productTbl"></table></div></div>
+    </div>
+    <div style="font-size:10.5px;color:var(--text-3);margin-top:10px;line-height:1.6">
+      <b>Point calculation:</b> Distribution Point = number of SKUs present in an outlet (max 251 points/outlet). &nbsp; <b>Target:</b> 60% of 251 products = 151 points/outlet (minimum coverage target).
+      <span class="thr-legend" style="justify-content:flex-start;margin-top:4px"><span><span class="thr-dot" style="background:var(--green)"></span>&gt;60% (&gt;151 pts) On Track</span><span><span class="thr-dot" style="background:var(--amber)"></span>40–60% (100–151 pts) Below Target</span><span><span class="thr-dot" style="background:var(--danger)"></span>0–40% (&lt;100 pts) At Risk</span></span><br>
+      <b>Data note:</b> Region, Channel, Sales Group, Sales Rep., Principal and Brand all share one underlying set of 1,800 customer outlets, so every filter above combines with true AND logic. With no filters applied, the KPIs reproduce the report's exact figures (1,800 customers, 103 avg. pts/outlet). Filtered slices are recomputed live from that same outlet set — since the source report's per-dimension tables were each generated independently, a single-dimension filter here approximates (rather than exactly reproduces) that dimension's original static table.
+    </div>
+  </div></div>
+
+  <!-- ── PAGE 3: FIELD EXECUTION ── -->
+  <div id="tab-ov-field" class="tab-panel"><div class="main">
+    <div class="section-label">Field Execution Dashboard <span style="font-weight:400;text-transform:none;color:var(--text-2)">— track field execution quality, outlet development, and sales coverage performance</span></div>
+    <div class="filterbar" id="field-filterbar"></div>
+    <div id="field-scope" class="scope-note" style="display:none"></div>
+    <div class="panel" style="margin-bottom:12px">
+      <div class="panel-hdr red">Field Execution Overview</div>
+      <div class="panel-body kpi-band cols5" style="padding:14px 8px">
+        <div class="kpi"><div class="kpi-icon" style="background:var(--red-l)"><svg viewBox="0 0 24 24" fill="none" stroke="#C8102E" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div><div><div class="kpi-label">Weekly Target</div><div class="kpi-val red" id="field-kpi-weekly">—</div><div class="kpi-sub">visits · <span id="field-kpi-weekly-ach"></span> achievement</div></div></div>
+        <div class="kpi"><div class="kpi-icon" style="background:var(--orange-l)"><svg viewBox="0 0 24 24" fill="none" stroke="#f2841f" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div><div><div class="kpi-label">Monthly Target</div><div class="kpi-val" style="color:var(--orange)" id="field-kpi-monthly">—</div><div class="kpi-sub">visits · <span id="field-kpi-monthly-ach"></span> achievement</div></div></div>
+        <div class="kpi"><div class="kpi-icon" style="background:var(--blue-l)"><svg viewBox="0 0 24 24" fill="none" stroke="#2f6fed" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg></div><div><div class="kpi-label">Qualified Visit</div><div class="kpi-val" style="color:var(--blue)" id="field-kpi-qual">—</div><div class="kpi-sub">visits · <span id="field-kpi-qual-ach"></span> vs target</div></div></div>
+        <div class="kpi"><div class="kpi-icon" style="background:var(--green-l)"><svg viewBox="0 0 24 24" fill="none" stroke="#2e8b45" stroke-width="2"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div><div class="kpi-label">Lead Created</div><div class="kpi-val" style="color:var(--green)" id="field-kpi-lead">—</div><div class="kpi-sub"><span id="field-kpi-lead-ach"></span> vs target</div></div></div>
+        <div class="kpi"><div class="kpi-icon" style="background:var(--purple-l)"><svg viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div><div class="kpi-label">Prospect Created</div><div class="kpi-val" style="color:var(--purple)" id="field-kpi-prospect">—</div><div class="kpi-sub"><span id="field-kpi-prospect-ach"></span> conversion rate</div></div></div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="panel">
+        <div class="panel-hdr dark">Visit Execution Pipeline (Period)</div>
+        <div class="panel-body" id="field-pipeline"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr dark">Visit Achievement by Region (Qualified Visit)</div>
+        <div class="panel-body"><div style="position:relative;width:100%;height:250px"><canvas id="field-regionChart"></canvas></div></div>
+      </div>
+    </div>
+    <div class="panel" style="margin-bottom:12px">
+      <div class="panel-hdr dark">Visit Achievement by Sales Group</div>
+      <div class="panel-body"><div class="scroll-x"><table class="data-tbl" id="field-sgTbl"></table></div></div>
+    </div>
+    <div class="grid2">
+      <div class="panel">
+        <div class="panel-hdr dark">Lead Created (Period)</div>
+        <div class="panel-body"><div style="position:relative;width:100%;height:200px"><canvas id="field-leadChart"></canvas></div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr dark">Prospect Created (Period)</div>
+        <div class="panel-body"><div style="position:relative;width:100%;height:200px"><canvas id="field-prospectChart"></canvas></div></div>
+      </div>
+    </div>
+    <div style="font-size:10.5px;color:var(--text-3);margin-top:6px;line-height:1.7">
+      <b>Metric definitions:</b> Planned Visit = total visits planned based on the call plan. Check-In = visits with successful check-in. GPS Verified = visits with a valid GPS stamp. Photo Submitted = visits with a photo report captured. Qualified Visit = visits with both valid GPS and photo.<br>
+      <b>Note:</b> a visit is valid only when both GPS Compliance and Photo Compliance are achieved. Lead→Prospect conversion shows the effectiveness of field activities in generating quality opportunities.<br>
+      <b>Data note:</b> Region and Sales Group are reconciled into one Region × Sales Group grid so both filters combine with true AND logic. The Sales Group table's Qualified Visit figures summed to slightly more than the reported total, so they're rescaled to match the report's exact 3,355 while preserving each group's relative share; Lead/Prospect counts (only reported as single totals) are allocated across the grid in proportion to Qualified Visit volume.
+    </div>
+  </div></div>
+
+  <!-- ── PAGE 4: TRADE PROGRAM EXECUTION ── -->
+  <div id="tab-ov-trade" class="tab-panel"><div class="main">
+    <div class="section-label">Trade Program Execution <span style="font-weight:400;text-transform:none;color:var(--text-2)">— track trade program deployment and execution across all stages</span></div>
+    <div class="filterbar" id="trade-filterbar"></div>
+    <div id="trade-scope" class="scope-note" style="display:none"></div>
+    <div class="panel" style="margin-bottom:12px">
+      <div class="panel-hdr red">Key Program Summary</div>
+      <div class="panel-body kpi-band cols5" style="padding:14px 8px">
+        <div class="kpi"><div class="kpi-icon" style="background:var(--red-l)"><svg viewBox="0 0 24 24" fill="none" stroke="#C8102E" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div><div><div class="kpi-label">Hunting List</div><div class="kpi-val red" id="trade-kpi-hunting">—</div><div class="kpi-sub">outlets</div></div></div>
+        <div class="kpi"><div class="kpi-icon" style="background:var(--orange-l)"><svg viewBox="0 0 24 24" fill="none" stroke="#f2841f" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg></div><div><div class="kpi-label">Approved Outlet</div><div class="kpi-val" style="color:var(--orange)" id="trade-kpi-approved">—</div><div class="kpi-sub">outlets</div></div></div>
+        <div class="kpi"><div class="kpi-icon" style="background:var(--blue-l)"><svg viewBox="0 0 24 24" fill="none" stroke="#2f6fed" stroke-width="2"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z"/></svg></div><div><div class="kpi-label">Active Execution</div><div class="kpi-val" style="color:var(--blue)" id="trade-kpi-active">—</div><div class="kpi-sub">outlets</div></div></div>
+        <div class="kpi"><div class="kpi-icon" style="background:var(--green-l)"><svg viewBox="0 0 24 24" fill="none" stroke="#2e8b45" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M9 12l2 2 4-4"/></svg></div><div><div class="kpi-label">Proof Validation</div><div class="kpi-val" style="color:var(--green)" id="trade-kpi-proof">—</div><div class="kpi-sub">outlets</div></div></div>
+        <div class="kpi"><div class="kpi-icon" style="background:var(--purple-l)"><svg viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2"><path d="M20 12V8H6a2 2 0 0 1 0-4h12v4M4 6v12a2 2 0 0 0 2 2h14v-4M18 12a2 2 0 0 0 0 4h4v-4z"/></svg></div><div><div class="kpi-label">Settlement</div><div class="kpi-val" style="color:var(--purple)" id="trade-kpi-settle">—</div><div class="kpi-sub">outlets</div></div></div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="panel">
+        <div class="panel-hdr dark">Program Execution Pipeline</div>
+        <div class="panel-body" id="trade-pipeline"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr dark">Outlet Participation by Region <span style="font-weight:400;font-size:9px;opacity:.8">(by execution stage)</span></div>
+        <div class="panel-body"><div style="position:relative;width:100%;height:230px"><canvas id="trade-regionChart"></canvas></div></div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="panel">
+        <div class="panel-hdr dark">Outlet Participation by Sales Group <span style="font-weight:400;font-size:9px;opacity:.8">(by execution stage)</span></div>
+        <div class="panel-body"><div style="position:relative;width:100%;height:230px"><canvas id="trade-sgChart"></canvas></div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr dark">Program Performance Summary</div>
+        <div class="panel-body"><div class="scroll-x"><table class="data-tbl" id="trade-programTbl"></table></div></div>
+      </div>
+    </div>
+    <div class="grid3">
+      <div class="panel">
+        <div class="panel-hdr dark">By Sales Group <span style="font-weight:400;font-size:9px;opacity:.8">(other filters applied)</span></div>
+        <div class="panel-body"><div class="scroll-x"><table class="data-tbl" id="trade-sgTbl"></table></div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr dark">By Sales Rep. <span style="font-weight:400;font-size:9px;opacity:.8">(other filters applied)</span></div>
+        <div class="panel-body"><div class="scroll-x"><table class="data-tbl" id="trade-repTbl"></table></div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr dark">By Principal <span style="font-weight:400;font-size:9px;opacity:.8">(other filters applied)</span></div>
+        <div class="panel-body"><div class="scroll-x"><table class="data-tbl" id="trade-principalTbl"></table></div></div>
+      </div>
+    </div>
+    <div style="font-size:10.5px;color:var(--text-3);margin-top:10px;line-height:1.7">
+      <b>Execution stage definitions:</b> Hunting List = outlets identified and proposed for the program. Approved Outlet = outlets approved for program execution. Active Execution = outlets currently executing the program. Proof Validation = proofs submitted and under validation. Settlement = incentive / reward settlement in progress.<br>
+      <b>Key metric:</b> Achievement Rate = Settlement / Approved Outlet. Outlet counts are distinct counts based on the selected filters; percentages may not total 100% due to rounding.<br>
+      <b>Data note:</b> Region, Sales Group, Sales Rep. and Principal now share one underlying set of 240 outlet-level records, so all four filters combine together (true AND filtering). With no filters applied, totals reproduce the report's exact headline figures (240 / 180 / 150 / 120 / 112); once you filter to a specific slice, per-stage figures are recomputed from that same record set and may differ slightly from the single-dimension tables shown earlier, since the underlying source tables didn't fully reconcile with each other (e.g. the Sales Rep and Principal tables in the original report summed to less/more than 240).
+    </div>
+  </div></div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     TOP SECTION 2 — BOM & BOD REPORT
+══════════════════════════════════════════════════ -->
+<div id="top-bombod" class="top-section">
+
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('bb-bom',this,'bombod')">BOM — Channel Distribution</button>
+    <button class="tab-btn" onclick="switchTab('bb-bod',this,'bombod')">BOD — Manufacturing Partners</button>
+  </div>
+
+  <!-- ═════ BOM TAB ═════ -->
+  <div id="tab-bb-bom" class="tab-panel active"><div class="main">
+    <div class="section-label">BOM — Channel Distribution Overview</div>
+    <div class="filterbar" id="bom-filterbar"></div>
+    <div class="mc-row" style="grid-template-columns:repeat(4,1fr)">
+      <div class="mc" style="border-left-color:var(--red)"><div class="mc-label">Total Outlets</div><div class="mc-val" id="bom-kpi-total">—</div><div class="mc-sub" id="bom-kpi-total-sub">6 channels</div></div>
+      <div class="mc" style="border-left-color:var(--blue)"><div class="mc-label">CVS</div><div class="mc-val" id="bom-kpi-cvs">8</div><div class="mc-sub">20.5% of total outlets</div></div>
+      <div class="mc" style="border-left-color:var(--amber)"><div class="mc-label">Highest Listing Fee</div><div class="mc-val">50M</div><div class="mc-sub">WINMART</div></div>
+      <div class="mc" style="border-left-color:var(--red)"><div class="mc-label">SKUs Tracked</div><div class="mc-val" id="bom-kpi-sku">14</div><div class="mc-sub">Campari, Wild Turkey, Skyy…</div></div>
+    </div>
+
+    <div class="section-label">Channel &amp; Listing Fee Analysis</div>
+    <div class="g2">
+      <div class="card">
+        <div class="card-title">Outlet Count by Channel</div>
+        <div class="chart-legend" id="donut-legend"></div>
+        <div style="position:relative;width:100%;height:200px"><canvas id="segChart" role="img" aria-label="Outlets by channel"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Listing Fee — Supermarket (Million VND)</div>
+        <div style="position:relative;width:100%;height:250px"><canvas id="feeChart" role="img" aria-label="Listing fee supermarket"></canvas></div>
+      </div>
+    </div>
+
+    <div class="section-label">Product Distribution Heatmap</div>
+    <div class="hm-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:12px">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center" id="segFilters"></div>
+        <div class="hm-legend">
+          <span class="hm-leg"><span class="hm-sq" style="background:#C8102E"></span>Listed</span>
+          <span class="hm-leg"><span class="hm-sq" style="background:#2f6fed"></span>RL</span>
+          <span class="hm-leg"><span class="hm-sq" style="background:#e0433c"></span>BL</span>
+          <span class="hm-leg"><span class="hm-sq" style="background:#b9cef1"></span>L</span>
+          <span class="hm-leg"><span class="hm-sq" style="background:#e5942a"></span>RJ</span>
+          <span class="hm-leg"><span class="hm-sq" style="background:#8f8d88"></span>Listed (2)</span>
+          <span class="hm-leg"><span class="hm-sq c0"></span>—</span>
+        </div>
+      </div>
+      <div class="scroll-wrap hm"><table id="heatTable"></table></div>
+    </div>
+  </div></div>
+
+  <!-- ═════ BOD TAB ═════ -->
+  <div id="tab-bb-bod" class="tab-panel"><div class="main">
+    <div class="section-label">BOD — Manufacturing Partner Report</div>
+    <div class="filterbar" id="bod-filterbar"></div>
+    <div class="scope-note" id="bod-scope" style="display:none"></div>
+
+    <div class="mc-row" style="grid-template-columns:repeat(5,1fr)">
+      <div class="mc" style="border-left-color:var(--purple)"><div class="mc-label">Mfg. Partners</div><div class="mc-val">5</div><div class="mc-sub">Spirits &amp; Gin portfolio</div></div>
+      <div class="mc" style="border-left-color:var(--red)"><div class="mc-label">Total Bottles YTD</div><div class="mc-val" id="kpi-total">—</div><div class="mc-sub">Actual distributed</div></div>
+      <div class="mc" style="border-left-color:var(--blue)"><div class="mc-label">Annual Plan</div><div class="mc-val" id="kpi-plan">—</div><div class="mc-sub">Contract commitment</div></div>
+      <div class="mc" style="border-left-color:var(--amber)"><div class="mc-label">Completion Rate</div><div class="mc-val" id="kpi-pct">—</div><div class="mc-sub">Actual vs. Plan</div></div>
+      <div class="mc" style="border-left-color:var(--danger)"><div class="mc-label">At-Risk Outlets</div><div class="mc-val" id="kpi-risk">—</div><div class="mc-sub">Below target</div></div>
+    </div>
+
+    <div class="section-label">1 &amp; 2 — Plan / Actual &amp; Outlet Comparison</div>
+    <div class="g2">
+      <div class="card">
+        <div class="card-title">Cumulative Actual vs. Plan (bottles)</div>
+        <div class="chart-legend" id="line-legend"></div>
+        <div style="position:relative;width:100%;height:240px"><canvas id="lineChart" role="img" aria-label="Cumulative actual vs plan by month"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Total Bottles by Outlet vs. Plan</div>
+        <div style="position:relative;width:100%;height:250px"><canvas id="outletBar" role="img" aria-label="Bottles by outlet vs plan"></canvas></div>
+      </div>
+    </div>
+
+    <div class="section-label">3 — Analysis by Manufacturing Partner</div>
+    <div class="g2">
+      <div class="card">
+        <div class="card-title">Actual by Partner (bottles)</div>
+        <div class="chart-legend" id="partner-donut-legend"></div>
+        <div style="position:relative;width:100%;height:220px"><canvas id="partnerDonut" role="img" aria-label="Bottles by partner"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Actual vs. Plan by Partner</div>
+        <div style="position:relative;width:100%;height:250px"><canvas id="partnerBar" role="img" aria-label="Actual vs plan by partner"></canvas></div>
+      </div>
+    </div>
+
+    <div class="section-label">4 — Partner × Channel Heatmap (Total Bottles)</div>
+    <div class="hm-card">
+      <div style="font-size:11px;color:var(--text-2);margin-bottom:10px">Color represents volume: <span style="background:#fbe7ea;color:#8c0b20;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600">low</span> → <span style="background:#8c0b20;color:#fff;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600">high</span></div>
+      <div class="bod-hm-wrap"><table class="bhm-tbl" id="bodHmTable"></table></div>
+    </div>
+
+    <div class="section-label">5 — Detail by Partner, Outlet, Channel</div>
+    <div id="accordionWrap"></div>
+
+  </div></div>
+
+</div>
+
+<div id="tip"><b id="tip-o"></b><div class="tip-sub" id="tip-p"></div><div class="tip-sub" id="tip-v"></div></div>
+
+<script>
+/* ══════════════════════════════════════
+   SHARED HELPERS
+══════════════════════════════════════ */
+function seededRandom(seed){let s=seed;return function(){s=(s*9301+49297)%233280;return s/233280;};}
+function numFmt(n){return Math.round(n).toLocaleString('en-US')}
+function pctColor(p){return p>=60?'#2e8b45':p>=40?'#e5942a':'#e0433c'}
+function pctColor100(p){return p>=100?'#2e8b45':p>=80?'#2f6fed':p>=60?'#e5942a':'#e0433c'}
+
+const thresholdLinePlugin = {
+  id: 'thresholdLines',
+  afterDraw(chart, args, opts) {
+    if(!opts || !opts.lines) return;
+    const {ctx, chartArea, scales} = chart;
+    const xScale = scales.x;
+    opts.lines.forEach(line=>{
+      const xPos = xScale.getPixelForValue(line.value);
+      ctx.save();
+      ctx.strokeStyle = line.color || '#C8102E';
+      ctx.setLineDash([4,3]);
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(xPos, chartArea.top);
+      ctx.lineTo(xPos, chartArea.bottom);
+      ctx.stroke();
+      ctx.restore();
+      if(line.label){
+        ctx.save();
+        ctx.fillStyle = line.color || '#C8102E';
+        ctx.font = '9px -apple-system,sans-serif';
+        ctx.textAlign = 'center';
+        const lines = line.label.split('\\n');
+        lines.forEach((l,i)=>ctx.fillText(l, xPos, chartArea.bottom + 14 + i*10));
+        ctx.restore();
+      }
+    });
+  }
+};
+Chart.register(thresholdLinePlugin);
+
+function renderGauge(pct, target){
+  const clamped = Math.max(0, Math.min(140, pct));
+  const angle = (clamped/140)*180;
+  const needleAngle = -180 + angle;
+  const r=70, cx=90, cy=80;
+  function arcPath(startDeg,endDeg){
+    const s = (Math.PI/180)*(180-startDeg), e = (Math.PI/180)*(180-endDeg);
+    const x1=cx+r*Math.cos(s), y1=cy-r*Math.sin(s);
+    const x2=cx+r*Math.cos(e), y2=cy-r*Math.sin(e);
+    return `M ${x1} ${y1} A ${r} ${r} 0 0 1 ${x2} ${y2}`;
+  }
+  const zone1=(40/140)*180, zone2=(60/140)*180;
+  const nx = cx + (r-8)*Math.cos((Math.PI/180)*(180-angle));
+  const ny = cy - (r-8)*Math.sin((Math.PI/180)*(180-angle));
+  return `<svg viewBox="0 0 180 100" style="width:180px;height:100px">
+    <path d="${arcPath(0,zone1)}" stroke="#e0433c" stroke-width="14" fill="none" stroke-linecap="round"/>
+    <path d="${arcPath(zone1,zone2)}" stroke="#e5942a" stroke-width="14" fill="none"/>
+    <path d="${arcPath(zone2,180)}" stroke="#2e8b45" stroke-width="14" fill="none" stroke-linecap="round"/>
+    <line x1="${cx}" y1="${cy}" x2="${nx}" y2="${ny}" stroke="#181818" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="${cx}" cy="${cy}" r="4" fill="#181818"/>
+  </svg>
+  <div class="gauge-val" style="color:${pctColor(clamped)}">${Math.round(pct)}%</div>
+  <div class="gauge-cap">Overall achievement vs target ${target}%</div>`;
+}
+
+function switchTop(id,btn){
+  document.querySelectorAll('.top-section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.top-nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('top-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+function switchTab(id,btn,scope){
+  const root = btn.closest('.top-section');
+  root.querySelectorAll(':scope > .tab-nav > .tab-btn').forEach(b=>b.classList.remove('active'));
+  root.querySelectorAll(':scope > .tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function buildFilterGroup(num, label, selectId, options, extraStyle){
+  let opts = options.map(o=>`<option value="${o}">${o}</option>`).join('');
+  return `<div class="fgroup"${extraStyle?` style="${extraStyle}"`:''}>
+    <div class="fgroup-label"><span class="fnum">${num}</span>${label}</div>
+    <select id="${selectId}">${opts}</select>
+  </div>`;
+}
+
+/* ══════════════════════════════════════════════════
+   PAGE 1 — UNIVERSE MANAGEMENT (synthetic, calibrated)
+══════════════════════════════════════════════════ */
+const U_REGIONS=['All','North','Central','South'];
+const U_CHANNELS=['All','On-premise','Off-premise'];
+const U_SALESGROUPS=['All','WS-Central','WS-North','WS-South','OT-South','Modern Trade'];
+const U_SALESREPS=['All','Le Tri Nguyen','Ly Tien Vinh','Phan Tu Quyen','Duong Quoc Linh'];
+const U_PRINCIPALS=['All','Edrington','Campari','Remy','Proximo','Jagermeister'];
+const U_TYPES=['HORECA','Modern Trade','Traditional Trade','Convenience'];
+
+let universeData=[];
+(function buildUniverseData(){
+  const rnd=seededRandom(42);
+  const regions=['North','Central','South'];
+  const channels=['On-premise','Off-premise'];
+  const groups=['WS-Central','WS-North','WS-South','OT-South','Modern Trade'];
+  const reps=['Le Tri Nguyen','Ly Tien Vinh','Phan Tu Quyen','Duong Quoc Linh'];
+  const principals=['Edrington','Campari','Remy','Proximo','Jagermeister'];
+  const combos=[];
+  regions.forEach(region=>channels.forEach(channel=>groups.forEach(sg=>reps.forEach(rep=>{
+    combos.push({region,channel,salesGroup:sg,salesRep:rep});
+  }))));
+  const base = 8000/combos.length;
+  let runningLead=0, runningProspect=0, runningCustomer=0, runningCalled=0, runningDirect=0;
+  combos.forEach((c,i)=>{
+    const variance = 0.55+rnd()*0.9;
+    const total = base*variance;
+    const leadShare=0.44+rnd()*0.14, prospectShare=0.21+rnd()*0.09;
+    const lead=total*leadShare, prospect=total*prospectShare, customer=Math.max(0,total-lead-prospect);
+    const calledShare=0.58+rnd()*0.18, directShare=0.30+rnd()*0.20;
+    universeData.push({
+      region:c.region, channel:c.channel, salesGroup:c.salesGroup, salesRep:c.salesRep,
+      principal:principals[i%principals.length], type:U_TYPES[i%U_TYPES.length],
+      lead, prospect, customer,
+      calledOn:customer*calledShare, nonCalledOn:customer*(1-calledShare),
+      direct:customer*directShare, indirect:customer*(1-directShare)
+    });
+  });
+  // rescale so totals exactly match PDF headline figures
+  const sum=(k)=>universeData.reduce((s,r)=>s+r[k],0);
+  const targets={lead:4200,prospect:2000,customer:1800};
+  ['lead','prospect','customer'].forEach(k=>{
+    const factor=targets[k]/sum(k);
+    universeData.forEach(r=>r[k]*=factor);
+  });
+  universeData.forEach(r=>{
+    const custSum=r.calledOn+r.nonCalledOn;
+    const calledFactor = custSum? r.customer/custSum : 0;
+    r.calledOn*=calledFactor; r.nonCalledOn*=calledFactor;
+    const dirSum=r.direct+r.indirect;
+    const dirFactor = dirSum? r.customer/dirSum : 0;
+    r.direct*=dirFactor; r.indirect*=dirFactor;
+  });
+})();
+
+function uniFiltered(){
+  const region=document.getElementById('uni-f-region').value;
+  const channel=document.getElementById('uni-f-channel').value;
+  const sg=document.getElementById('uni-f-sg').value;
+  const rep=document.getElementById('uni-f-rep').value;
+  const principal=document.getElementById('uni-f-principal').value;
+  return universeData.filter(r=>
+    (region==='All'||r.region===region) &&
+    (channel==='All'||r.channel===channel) &&
+    (sg==='All'||r.salesGroup===sg) &&
+    (rep==='All'||r.salesRep===rep) &&
+    (principal==='All'||r.principal===principal)
+  );
+}
+
+let uniCharts={};
+function renderUniverse(){
+  const rows=uniFiltered();
+  const sum=(k)=>rows.reduce((s,r)=>s+r[k],0);
+  const total=sum('lead')+sum('prospect')+sum('customer');
+  const lead=sum('lead'), prospect=sum('prospect'), customer=sum('customer');
+  const calledOn=sum('calledOn'), nonCalled=sum('nonCalledOn');
+  const direct=sum('direct'), indirect=sum('indirect');
+
+  document.getElementById('uni-kpi-total').textContent=numFmt(total);
+  document.getElementById('uni-kpi-lead').textContent=numFmt(lead);
+  document.getElementById('uni-kpi-lead-pct').textContent=(total?Math.round(lead/total*100):0)+'% of universe';
+  document.getElementById('uni-kpi-cust').textContent=numFmt(customer);
+  document.getElementById('uni-kpi-cust-pct').textContent=(total?Math.round(customer/total*100):0)+'% of universe';
+
+  const fw=document.getElementById('uni-funnel');
+  const maxW=100;
+  const leadW=100, prospW=total?Math.max(35,(prospect/lead||0)*100*0.9+30):60, custW=total?Math.max(22,(customer/lead||0)*100*0.9+18):40;
+  fw.innerHTML=`
+    <div class="funnel-tier" style="background:#8f8d88;width:${leadW}%;border-radius:6px 6px 0 0"><div class="ft-label">Lead</div><div class="ft-val">${numFmt(lead)}</div><div class="ft-sub">outlets</div></div>
+    <div class="funnel-tier" style="background:#5c5a56;width:${Math.min(80,prospW)}%"><div class="ft-label">Prospect</div><div class="ft-val">${numFmt(prospect)}</div><div class="ft-sub">outlets</div></div>
+    <div class="funnel-tier" style="background:var(--red);width:${Math.min(60,custW)}%;border-radius:0 0 6px 6px"><div class="ft-label">Customer</div><div class="ft-val">${numFmt(customer)}</div><div class="ft-sub">outlets</div></div>
+  `;
+
+  document.getElementById('uni-summary-tbl').innerHTML=`
+    <tr><td>Total Universe</td><td class="r" style="font-weight:700">${numFmt(total)}</td><td class="r" style="color:var(--text-3)">100%</td></tr>
+    <tr><td>Lead</td><td class="r">${numFmt(lead)}</td><td class="r" style="color:var(--text-3)">${total?Math.round(lead/total*100):0}%</td></tr>
+    <tr><td>Prospect</td><td class="r">${numFmt(prospect)}</td><td class="r" style="color:var(--text-3)">${total?Math.round(prospect/total*100):0}%</td></tr>
+    <tr><td style="color:var(--red);font-weight:600">Customer</td><td class="r" style="color:var(--red);font-weight:700">${numFmt(customer)}</td><td class="r" style="color:var(--text-3)">${total?Math.round(customer/total*100):0}%</td></tr>
+  `;
+
+  const coveragePct = customer? Math.round(calledOn/customer*100):0;
+  document.getElementById('uni-coverage').innerHTML=`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><span style="width:10px;height:10px;border-radius:50%;background:var(--red);flex-shrink:0"></span><div style="flex:1"><div style="font-size:10px;color:var(--text-3);text-transform:uppercase">Called-on Customer</div><div style="font-weight:700;font-size:16px">${numFmt(calledOn)} <span style="font-size:11px;color:var(--text-3);font-weight:400">(${coveragePct}%)</span></div></div></div>
+    <div style="display:flex;align-items:center;gap:10px"><span style="width:10px;height:10px;border-radius:50%;background:#8f8d88;flex-shrink:0"></span><div style="flex:1"><div style="font-size:10px;color:var(--text-3);text-transform:uppercase">Non-called-on Customer</div><div style="font-weight:700;font-size:16px">${numFmt(nonCalled)} <span style="font-size:11px;color:var(--text-3);font-weight:400">(${100-coveragePct}%)</span></div></div></div>
+    <div style="margin-top:12px;font-size:10.5px;color:var(--text-3);background:var(--surface2);border-radius:6px;padding:8px 10px">Coverage status applies only to Customer outlets.</div>
+  `;
+
+  const directPct=customer?Math.round(direct/customer*100):0;
+  document.getElementById('uni-classLegend').innerHTML=`
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><span style="width:10px;height:10px;border-radius:2px;background:#8f8d88"></span><div><div style="font-weight:700">${numFmt(direct)} <span style="font-size:11px;font-weight:400;color:var(--text-3)">(${directPct}%)</span></div><div style="font-size:10.5px;color:var(--text-3)">Direct Outlet</div></div></div>
+    <div style="display:flex;align-items:center;gap:8px"><span style="width:10px;height:10px;border-radius:2px;background:var(--red)"></span><div><div style="font-weight:700">${numFmt(indirect)} <span style="font-size:11px;font-weight:400;color:var(--text-3)">(${100-directPct}%)</span></div><div style="font-size:10.5px;color:var(--text-3)">Indirect Outlet</div></div></div>
+  `;
+
+  if(uniCharts.donut) uniCharts.donut.destroy();
+  uniCharts.donut = new Chart(document.getElementById('uni-classDonut'),{
+    type:'doughnut',
+    data:{labels:['Direct','Indirect'],datasets:[{data:[direct,indirect],backgroundColor:['#8f8d88','#C8102E'],borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${numFmt(ctx.raw)}`}}},cutout:'62%'}
+  });
+
+  const regionAgg={};
+  ['North','Central','South'].forEach(r=>{regionAgg[r]={lead:0,prospect:0,customer:0}});
+  rows.forEach(r=>{regionAgg[r.region].lead+=r.lead;regionAgg[r.region].prospect+=r.prospect;regionAgg[r.region].customer+=r.customer});
+  if(uniCharts.region) uniCharts.region.destroy();
+  uniCharts.region = new Chart(document.getElementById('uni-regionChart'),{
+    type:'bar',
+    data:{labels:['North','Central','South'],datasets:[
+      {label:'Lead',data:['North','Central','South'].map(r=>Math.round(regionAgg[r].lead)),backgroundColor:'#c9c7c2',borderRadius:3},
+      {label:'Prospect',data:['North','Central','South'].map(r=>Math.round(regionAgg[r].prospect)),backgroundColor:'#8f8d88',borderRadius:3},
+      {label:'Customer',data:['North','Central','South'].map(r=>Math.round(regionAgg[r].customer)),backgroundColor:'#C8102E',borderRadius:3}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:10}}},y:{stacked:true,grid:{color:'rgba(0,0,0,.04)'},ticks:{font:{size:10}}}}}
+  });
+}
+
+function buildUniverseFilterBar(){
+  const el=document.getElementById('uni-filterbar');
+  el.innerHTML=
+    buildFilterGroup(1,'Region','uni-f-region',U_REGIONS)+
+    buildFilterGroup(2,'Channel','uni-f-channel',U_CHANNELS)+
+    buildFilterGroup(3,'Sales Group','uni-f-sg',U_SALESGROUPS)+
+    buildFilterGroup(4,'Sales Rep.','uni-f-rep',U_SALESREPS)+
+    buildFilterGroup(5,'Principal','uni-f-principal',U_PRINCIPALS)+
+    `<button class="reset-btn" onclick="resetUniFilters()">↺<span>Reset</span></button>`;
+  el.querySelectorAll('select').forEach(s=>s.addEventListener('change',renderUniverse));
+}
+function resetUniFilters(){
+  ['uni-f-region','uni-f-channel','uni-f-sg','uni-f-rep','uni-f-principal'].forEach(id=>document.getElementById(id).value='All');
+  renderUniverse();
+}
+buildUniverseFilterBar();
+renderUniverse();
+
+/* ══════════════════════════════════════════════════
+   PAGE 2 — DISTRIBUTION DEPTH
+   Joint outlet-level microdata (1,800 customers) built from
+   combinations of Region × Channel × Sales Group × Sales Rep,
+   each tagged with a Principal/Brand/Category and a depth value
+   anchored to the report's own per-dimension averages — so every
+   filter combines with true AND logic.
+══════════════════════════════════════════════════ */
+const depthByRegion=[{k:'North',v:179,p:69},{k:'Central',v:154,p:59},{k:'South',v:122,p:47}];
+const depthByChannel=[{k:'On-premise',v:187,p:72},{k:'Off-premise',v:136,p:53}];
+const depthBySG=[{k:'WS-Central',v:171,p:66},{k:'WS-North',v:158,p:61},{k:'WS-South',v:127,p:49},{k:'OT-South',v:108,p:42},{k:'Modern Trade',v:90,p:35}];
+const depthByRep=[{k:'Le Tri Nguyen',v:177,p:68},{k:'Ly Tien Vinh',v:159,p:61},{k:'Phan Tu Quyen',v:126,p:49},{k:'Duong Quoc Linh',v:97,p:37}];
+const depthByPrincipal=[{k:'Edrington',v:164,p:63},{k:'Campari',v:154,p:60},{k:'Remy',v:123,p:48},{k:'Proximo',v:109,p:42},{k:'Jagermeister',v:93,p:36}];
+const depthByBrand=[{k:'The Macallan',v:172,p:66},{k:'Bushmills',v:150,p:58},{k:'Remy Martin',v:132,p:51},{k:'1800',v:118,p:46},{k:'Lady Trieu',v:109,p:42},{k:'Cointreau',v:94,p:36}];
+const depthProducts=[
+  {name:'The Macallan 12YO Double Cask 0.7L',depth:172,category:'Whisky',principal:'Edrington',brand:'The Macallan'},
+  {name:'Bushmills 12YO 0.7L',depth:150,category:'Whisky',principal:'Campari',brand:'Bushmills'},
+  {name:'Cointreau 0.75L',depth:132,category:'Liqueur',principal:'Remy',brand:'Cointreau'},
+  {name:'The Botanist 0.7L',depth:118,category:'Gin',principal:'Remy',brand:'The Botanist'},
+  {name:'Jagermeister 0.7L',depth:109,category:'Herbal Liqueur',principal:'Jagermeister',brand:'Jagermeister'},
+  {name:'St. Remy VSOP 0.7L',depth:95,category:'Brandy',principal:'Remy',brand:'St. Remy'},
+  {name:'Campari 0.75L',depth:89,category:'Liqueur',principal:'Campari',brand:'Campari'},
+  {name:'Lady Trieu Contemporary Gin 0.7L',depth:81,category:'Gin',principal:'Jagermeister',brand:'Lady Trieu'},
+  {name:'Jose Cuervo Especial Reposado 0.7L',depth:74,category:'Tequila',principal:'Proximo',brand:'Jose Cuervo'},
+  {name:'Aperol 0.7L',depth:70,category:'Liqueur',principal:'Campari',brand:'Aperol'}
+];
+const DEPTH_TOTAL_CUSTOMERS=1800, DEPTH_TARGET_AVG=103;
+const DEPTH_BRAND_META={
+  'The Macallan':{principal:'Edrington',category:'Whisky'},
+  'Bushmills':{principal:'Campari',category:'Whisky'},
+  'Remy Martin':{principal:'Remy',category:'Cognac'},
+  '1800':{principal:'Proximo',category:'Tequila'},
+  'Lady Trieu':{principal:'Jagermeister',category:'Gin'},
+  'Cointreau':{principal:'Remy',category:'Liqueur'}
+};
+
+let depthJointData=[];
+(function buildDepthJointData(){
+  const rnd=seededRandom(66);
+  const regions=depthByRegion.map(r=>r.k), channels=depthByChannel.map(r=>r.k), groups=depthBySG.map(r=>r.k), reps=depthByRep.map(r=>r.k);
+  const regionAvg=Object.fromEntries(depthByRegion.map(r=>[r.k,r.v]));
+  const channelAvg=Object.fromEntries(depthByChannel.map(r=>[r.k,r.v]));
+  const sgAvg=Object.fromEntries(depthBySG.map(r=>[r.k,r.v]));
+  const repAvg=Object.fromEntries(depthByRep.map(r=>[r.k,r.v]));
+  const principalAvg=Object.fromEntries(depthByPrincipal.map(r=>[r.k,r.v]));
+  const brandAvg=Object.fromEntries(depthByBrand.map(r=>[r.k,r.v]));
+  const brandList=depthByBrand.map(r=>r.k);
+  const brandMeta=DEPTH_BRAND_META;
+
+  const combos=[];
+  regions.forEach(region=>channels.forEach(channel=>groups.forEach(sg=>reps.forEach(rep=>{combos.push({region,channel,salesGroup:sg,salesRep:rep})}))));
+  const base=DEPTH_TOTAL_CUSTOMERS/combos.length;
+  let idx=0;
+  const raw=combos.map(c=>{
+    const brand=brandList[idx%brandList.length]; idx++;
+    const meta=brandMeta[brand];
+    const weight=base*(0.55+rnd()*0.9);
+    const anchor=(regionAvg[c.region]+channelAvg[c.channel]+sgAvg[c.salesGroup]+repAvg[c.salesRep]+principalAvg[meta.principal]+brandAvg[brand])/6;
+    const depth=Math.max(0,Math.min(251, anchor+(rnd()-0.5)*30));
+    return {...c, principal:meta.principal, brand, category:meta.category, weight, depth};
+  });
+  // rescale weights to hit exactly 1,800 customers and depths so weighted mean hits 103
+  const wSum=raw.reduce((s,r)=>s+r.weight,0);
+  const wFactor=DEPTH_TOTAL_CUSTOMERS/wSum;
+  raw.forEach(r=>r.weight*=wFactor);
+  const dMean=raw.reduce((s,r)=>s+r.depth*r.weight,0)/DEPTH_TOTAL_CUSTOMERS;
+  const dFactor=DEPTH_TARGET_AVG/dMean;
+  raw.forEach(r=>r.depth=Math.max(0,Math.min(251, Math.round(r.depth*dFactor))));
+  depthJointData=raw;
+})();
+
+function depthActiveFilters(){
+  return {
+    region:document.getElementById('depth-f-region')?.value||'All',
+    channel:document.getElementById('depth-f-channel')?.value||'All',
+    salesGroup:document.getElementById('depth-f-sg')?.value||'All',
+    salesRep:document.getElementById('depth-f-rep')?.value||'All',
+    category:document.getElementById('depth-f-category')?.value||'All',
+    principal:document.getElementById('depth-f-principal')?.value||'All',
+    brand:document.getElementById('depth-f-brand')?.value||'All'
+  };
+}
+function depthMatch(r,f,exclude){
+  return (exclude==='region'||f.region==='All'||r.region===f.region)
+    && (exclude==='channel'||f.channel==='All'||r.channel===f.channel)
+    && (exclude==='salesGroup'||f.salesGroup==='All'||r.salesGroup===f.salesGroup)
+    && (exclude==='salesRep'||f.salesRep==='All'||r.salesRep===f.salesRep)
+    && (exclude==='category'||f.category==='All'||r.category===f.category)
+    && (exclude==='principal'||f.principal==='All'||r.principal===f.principal)
+    && (exclude==='brand'||f.brand==='All'||r.brand===f.brand);
+}
+function weightedDepth(records){
+  const w=records.reduce((s,r)=>s+r.weight,0);
+  const d=records.reduce((s,r)=>s+r.depth*r.weight,0);
+  return {count:w, avg:w?d/w:0};
+}
+
+let depthCharts={};
+function makeThresholdBar(canvasId, data){
+  const labels=data.map(d=>d.k);
+  const values=data.map(d=>d.v);
+  const colors=data.map(d=>pctColor(d.p));
+  if(depthCharts[canvasId]) depthCharts[canvasId].destroy();
+  depthCharts[canvasId]=new Chart(document.getElementById(canvasId),{
+    type:'bar',
+    data:{labels,datasets:[{data:values,backgroundColor:colors,borderRadius:3,borderSkipped:false}]},
+    options:{
+      indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},
+        tooltip:{callbacks:{label:ctx=>` ${Math.round(data[ctx.dataIndex].v)} pts (${Math.round(data[ctx.dataIndex].p)}%)`}},
+        thresholdLines:{lines:[{value:100,color:'#e5942a',label:'40%\\n(100 pts)'},{value:151,color:'#2e8b45',label:'>60%\\n(151 pts)'}]}
+      },
+      layout:{padding:{bottom:22}},
+      scales:{x:{min:0,max:260,grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:9.5}}},y:{grid:{display:false},ticks:{font:{size:9.5}}}}
+    }
+  });
+}
+
+function renderDepth(){
+  const f=depthActiveFilters();
+  const filtered=depthJointData.filter(r=>depthMatch(r,f,null));
+  const {count,avg}=weightedDepth(filtered);
+  const avgPct=avg/251*100;
+
+  document.getElementById('depth-kpi-cust').textContent=numFmt(count);
+  document.getElementById('depth-kpi-avg').textContent=Math.round(avg);
+  document.getElementById('depth-kpi-avgpct').textContent=Math.round(avgPct)+'%';
+
+  const scopeNote=document.getElementById('depth-scope');
+  const parts=[];
+  const labelMap={region:'Region',channel:'Channel',salesGroup:'Sales Group',salesRep:'Sales Rep.',category:'Category',principal:'Principal',brand:'Brand'};
+  Object.entries(f).forEach(([k,v])=>{if(v!=='All')parts.push(labelMap[k]+' = '+v)});
+  if(parts.length){scopeNote.style.display='inline-flex';scopeNote.innerHTML=`Showing: ${parts.join(' · ')} <button onclick="resetDepthFilters()">clear</button>`;}
+  else{scopeNote.style.display='none';}
+
+  function groupBy(dim, keys){
+    const exclude=dim;
+    const base=depthJointData.filter(r=>depthMatch(r,f,exclude));
+    return keys.map(k=>{
+      const sub=base.filter(r=>r[dim]===k);
+      const {avg}=weightedDepth(sub);
+      return {k, v:avg, p:avg/251*100};
+    });
+  }
+  makeThresholdBar('depth-regionChart', groupBy('region', depthByRegion.map(r=>r.k)));
+  makeThresholdBar('depth-channelChart', groupBy('channel', depthByChannel.map(r=>r.k)));
+  makeThresholdBar('depth-sgChart', groupBy('salesGroup', depthBySG.map(r=>r.k)));
+  makeThresholdBar('depth-repChart', groupBy('salesRep', depthByRep.map(r=>r.k)));
+  makeThresholdBar('depth-principalChart', groupBy('principal', depthByPrincipal.map(r=>r.k)));
+  makeThresholdBar('depth-brandChart', groupBy('brand', depthByBrand.map(r=>r.k)));
+
+  const tbl=document.getElementById('depth-productTbl');
+  const product=document.getElementById('depth-f-product')?.value||'All';
+  const productFiltered=depthProducts.filter(p=>
+    (f.category==='All'||p.category===f.category) &&
+    (f.principal==='All'||p.principal===f.principal) &&
+    (f.brand==='All'||p.brand===f.brand) &&
+    (product==='All'||p.name===product)
+  );
+  let h='<tr><th>SKU</th><th>Category</th><th>Principal</th><th>Brand</th><th class="r">Avg. Depth (pts/outlet)</th></tr>';
+  if(!productFiltered.length){h+='<tr><td colspan="5" style="text-align:center;color:var(--text-3);padding:16px">No matching products</td></tr>'}
+  productFiltered.forEach(p=>{
+    h+=`<tr><td style="font-weight:600">${p.name}</td><td>${p.category}</td><td>${p.principal}</td><td>${p.brand}</td><td class="r"><span class="rate-pill" style="background:${pctColor(p.depth/251*100)}22;color:${pctColor(p.depth/251*100)}">${p.depth}</span></td></tr>`;
+  });
+  tbl.innerHTML=h;
+
+  const gaugeEl=document.getElementById('depth-gauge');
+  gaugeEl.innerHTML=renderGauge(avgPct, 60);
+}
+
+function buildDepthFilterBar(){
+  const el=document.getElementById('depth-filterbar');
+  const principals=['All',...depthByPrincipal.map(r=>r.k)];
+  const brands=['All',...depthByBrand.map(r=>r.k)];
+  const categories=['All',...new Set(depthByBrand.map(r=>DEPTH_BRAND_META[r.k].category))];
+  const products=['All',...depthProducts.map(p=>p.name)];
+  el.innerHTML=
+    buildFilterGroup(1,'Region','depth-f-region',['All',...depthByRegion.map(r=>r.k)])+
+    buildFilterGroup(2,'Channel','depth-f-channel',['All',...depthByChannel.map(r=>r.k)])+
+    buildFilterGroup(3,'Sales Group','depth-f-sg',['All',...depthBySG.map(r=>r.k)])+
+    buildFilterGroup(4,'Sales Rep.','depth-f-rep',['All',...depthByRep.map(r=>r.k)])+
+    buildFilterGroup(5,'Category','depth-f-category',categories)+
+    buildFilterGroup(6,'Principal','depth-f-principal',principals)+
+    buildFilterGroup(7,'Brand','depth-f-brand',brands, 'min-width:190px')+
+    buildFilterGroup(8,'Product','depth-f-product',products, 'min-width:210px')+
+    `<button class="reset-btn" onclick="resetDepthFilters()">↺<span>Reset</span></button>`;
+  el.querySelectorAll('select').forEach(s=>s.addEventListener('change',renderDepth));
+}
+function resetDepthFilters(){
+  ['depth-f-region','depth-f-channel','depth-f-sg','depth-f-rep','depth-f-category','depth-f-principal','depth-f-brand','depth-f-product'].forEach(id=>document.getElementById(id).value='All');
+  renderDepth();
+}
+buildDepthFilterBar();
+renderDepth();
+
+/* ══════════════════════════════════════════════════
+   PAGE 3 — FIELD EXECUTION
+   Joint Region × Sales Group grid (reconciled to the report's
+   grand totals) so both filters combine with true AND logic.
+══════════════════════════════════════════════════ */
+const fieldMonths={
+  'May 2026':{factor:1},
+  'Apr 2026':{factor:0.91},
+  'Mar 2026':{factor:0.81}
+};
+const fieldTotals={weeklyTarget:1070, weeklyAch:88.8, leadCreated:60, leadTarget:75, leadAch:80.0, prospectCreated:30, prospectTarget:38, prospectRate:50.0};
+const fieldPipelineFrac=[1,.861,.799,.743,.723]; // Planned/Check-In/GPS/Photo/Qualified as fraction of Planned
+const fieldRegionPop=[{k:'North',target:1640,achieved:1180},{k:'Central',target:1620,achieved:1155},{k:'South',target:1380,achieved:1020}];
+const fieldSGPopRaw=[
+  {k:'WS-Central',target:1060,achieved:783},
+  {k:'WS-North',target:1280,achieved:1455},
+  {k:'OT-South',target:940,achieved:640},
+  {k:'WS-South',target:800,achieved:573},
+  {k:'Modern Trade',target:560,achieved:405}
+];
+// Reconcile: region achieved sums to 3,355 (matches report total exactly);
+// sales-group achieved sums to 3,856 — rescale so both marginals agree.
+const FIELD_GRAND_TARGET=4640, FIELD_GRAND_QUALIFIED=3355;
+const fieldSGAchievedRaw=fieldSGPopRaw.reduce((s,r)=>s+r.achieved,0);
+const fieldSGPop=fieldSGPopRaw.map(r=>({k:r.k,target:r.target,achieved:r.achieved*(FIELD_GRAND_QUALIFIED/fieldSGAchievedRaw)}));
+
+// Build the Region × Sales Group grid via outer-product (both marginals already
+// sum to the same grand totals after reconciliation, so this satisfies both exactly).
+let fieldGrid=[]; // [{region,salesGroup,target,qualified}]
+fieldRegionPop.forEach(rg=>{
+  fieldSGPop.forEach(sg=>{
+    fieldGrid.push({
+      region:rg.k, salesGroup:sg.k,
+      target: rg.target*sg.target/FIELD_GRAND_TARGET,
+      qualified: rg.achieved*sg.achieved/FIELD_GRAND_QUALIFIED
+    });
+  });
+});
+
+let fieldCharts={};
+function fieldActiveFilters(){
+  return {region:document.getElementById('field-f-region').value, salesGroup:document.getElementById('field-f-sg').value};
+}
+function fieldFilteredCells(f, excludeDim){
+  return fieldGrid.filter(c=>
+    (excludeDim==='region'||f.region==='All'||c.region===f.region) &&
+    (excludeDim==='salesGroup'||f.salesGroup==='All'||c.salesGroup===f.salesGroup)
+  );
+}
+function fieldStageValues(cells, factor){
+  const target=cells.reduce((s,c)=>s+c.target,0)*factor;
+  const qualified=cells.reduce((s,c)=>s+c.qualified,0)*factor;
+  const passRate = target? qualified/target : 0; // this scope's actual pass-through rate
+  // interpolate intermediate stages using the same relative shape as the overall funnel
+  const stages=fieldPipelineFrac.map((frac,i)=>{
+    if(i===0) return target;
+    if(i===4) return qualified;
+    const shape=(1-frac)/(1-fieldPipelineFrac[4]); // 0..1 position between full drop and qualified-level drop
+    const cellFrac=1-shape*(1-passRate);
+    return target*cellFrac;
+  });
+  return {target, qualified, stages, passRate:passRate*100};
+}
+
+function renderField(){
+  const month=document.getElementById('field-f-month').value;
+  const factor=fieldMonths[month].factor;
+  const f=fieldActiveFilters();
+  const scopeNote=document.getElementById('field-scope');
+  const parts=[];
+  if(f.region!=='All') parts.push('Region = '+f.region);
+  if(f.salesGroup!=='All') parts.push('Sales Group = '+f.salesGroup);
+  if(parts.length){scopeNote.style.display='inline-flex';scopeNote.innerHTML=`Showing: ${parts.join(' · ')} <button onclick="resetFieldFilters()">clear</button>`;}
+  else{scopeNote.style.display='none';}
+
+  const cells=fieldFilteredCells(f,null);
+  const {target,qualified,stages,passRate}=fieldStageValues(cells,factor);
+  const shareOfTotal = qualified / (FIELD_GRAND_QUALIFIED*factor);
+
+  document.getElementById('field-kpi-weekly').textContent=numFmt(fieldTotals.weeklyTarget*factor*shareOfTotal);
+  document.getElementById('field-kpi-weekly-ach').textContent=fieldTotals.weeklyAch+'%';
+  document.getElementById('field-kpi-monthly').textContent=numFmt(target);
+  document.getElementById('field-kpi-monthly-ach').textContent=Math.round(passRate)+'%';
+  document.getElementById('field-kpi-qual').textContent=numFmt(qualified);
+  document.getElementById('field-kpi-qual-ach').textContent=Math.round(passRate)+'%';
+  document.getElementById('field-kpi-lead').textContent=numFmt(fieldTotals.leadCreated*factor*shareOfTotal);
+  document.getElementById('field-kpi-lead-ach').textContent=fieldTotals.leadAch+'%';
+  document.getElementById('field-kpi-prospect').textContent=numFmt(fieldTotals.prospectCreated*factor*shareOfTotal);
+  document.getElementById('field-kpi-prospect-ach').textContent=fieldTotals.prospectRate+'%';
+
+  const pipe=document.getElementById('field-pipeline');
+  const colors=['#e0433c','#f2841f','#2f6fed','#2e8b45','#8b5cf6'];
+  const stageLabels=['Planned Visit','Check-In','GPS Verified','Photo Submitted','Qualified Visit'];
+  let ph='<div class="pipeline">';
+  stageLabels.forEach((s,i)=>{ph+=`<div class="pipe-step" style="background:${colors[i]};--pipe-color:${colors[i]}"><div class="ps-label">${s}</div></div>`});
+  ph+='</div><div class="pipe-num-row">';
+  stages.forEach((v,i)=>{ph+=`<div style="color:${colors[i]}">${numFmt(v)}</div>`});
+  ph+='</div><div class="pipe-num-row">';
+  stages.forEach((v)=>{ph+=`<div style="font-size:10px;color:var(--text-3);font-weight:600">${target?Math.round(v/target*100):0}%</div>`});
+  ph+='</div><div class="pipe-caption">Outlets / Visits</div>';
+  pipe.innerHTML=ph;
+
+  // by-region chart: cross-filtered, excluding the region filter itself
+  const regionCellsBase=fieldFilteredCells(f,'region');
+  const regionData=fieldRegionPop.map(rg=>{
+    const cells2=regionCellsBase.filter(c=>c.region===rg.k);
+    const t=cells2.reduce((s,c)=>s+c.target,0)*factor, q=cells2.reduce((s,c)=>s+c.qualified,0)*factor;
+    return {k:rg.k, target:t, qualified:q, p:t?Math.round(q/t*1000)/10:0};
+  });
+  if(fieldCharts.region) fieldCharts.region.destroy();
+  fieldCharts.region=new Chart(document.getElementById('field-regionChart'),{
+    type:'bar',
+    data:{labels:regionData.map(r=>r.k),datasets:[
+      {label:'Monthly Target (Visits)',data:regionData.map(r=>Math.round(r.target)),backgroundColor:'#2f6fed',borderRadius:3},
+      {label:'Qualified Visit (Valid)',data:regionData.map(r=>Math.round(r.qualified)),backgroundColor:'#2e8b45',borderRadius:3}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}},
+      tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${numFmt(ctx.raw)}`}}},
+      scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10}}}}}
+  });
+
+  // by-sales-group table: cross-filtered, excluding the sales group filter itself
+  const sgCellsBase=fieldFilteredCells(f,'salesGroup');
+  const sgData=fieldSGPop.map(sg=>{
+    const cells2=sgCellsBase.filter(c=>c.salesGroup===sg.k);
+    const t=cells2.reduce((s,c)=>s+c.target,0)*factor, q=cells2.reduce((s,c)=>s+c.qualified,0)*factor;
+    return {k:sg.k, target:t, qualified:q, p:t?Math.round(q/t*1000)/10:0};
+  });
+  const sgTbl=document.getElementById('field-sgTbl');
+  let th='<tr><th>#</th><th>Sales Group</th><th class="r">Monthly Target (Visits)</th><th class="r">Qualified Visit (Valid)</th><th class="r">Achievement (%)</th></tr>';
+  sgData.forEach((r,i)=>{
+    const hl = f.salesGroup===r.k ? ' class="hl"':'';
+    th+=`<tr${hl}><td>${i+1}</td><td style="font-weight:600">${r.k}</td><td class="r">${numFmt(r.target)}</td><td class="r">${numFmt(r.qualified)}</td><td class="r"><span class="rate-pill" style="background:${pctColor(r.p)}22;color:${pctColor(r.p)}">${r.p}%</span></td></tr>`;
+  });
+  const totT=sgData.reduce((s,r)=>s+r.target,0), totQ=sgData.reduce((s,r)=>s+r.qualified,0);
+  th+=`<tr class="total-row"><td colspan="2">Total / Average</td><td class="r">${numFmt(totT)}</td><td class="r">${numFmt(totQ)}</td><td class="r">${totT?Math.round(totQ/totT*1000)/10:0}%</td></tr>`;
+  sgTbl.innerHTML=th;
+
+  if(fieldCharts.lead) fieldCharts.lead.destroy();
+  fieldCharts.lead=new Chart(document.getElementById('field-leadChart'),{
+    type:'bar',
+    data:{labels:['Target','Achieved'],datasets:[{data:[Math.round(fieldTotals.leadTarget*factor*shareOfTotal),Math.round(fieldTotals.leadCreated*factor*shareOfTotal)],backgroundColor:['#2f6fed','#2e8b45'],borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:11}}}}}
+  });
+  if(fieldCharts.prospect) fieldCharts.prospect.destroy();
+  fieldCharts.prospect=new Chart(document.getElementById('field-prospectChart'),{
+    type:'bar',
+    data:{labels:['Target','Achieved'],datasets:[{data:[Math.round(fieldTotals.prospectTarget*factor*shareOfTotal),Math.round(fieldTotals.prospectCreated*factor*shareOfTotal)],backgroundColor:['#2f6fed','#8b5cf6'],borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:11}}}}}
+  });
+}
+function resetFieldFilters(){
+  document.getElementById('field-f-region').value='All';
+  document.getElementById('field-f-sg').value='All';
+  renderField();
+}
+function buildFieldFilterBar(){
+  const el=document.getElementById('field-filterbar');
+  el.innerHTML=
+    buildFilterGroup(1,'Time','field-f-month',Object.keys(fieldMonths))+
+    buildFilterGroup(2,'Region','field-f-region',['All',...fieldRegionPop.map(r=>r.k)])+
+    buildFilterGroup(3,'Sales Group','field-f-sg',['All',...fieldSGPop.map(r=>r.k)])+
+    `<button class="reset-btn" onclick="resetFieldFilters()">↺<span>Reset</span></button>`;
+  el.querySelectorAll('select').forEach(s=>s.addEventListener('change',renderField));
+}
+buildFieldFilterBar();
+renderField();
+
+/* ══════════════════════════════════════════════════
+   PAGE 4 — TRADE PROGRAM EXECUTION
+   Joint outlet-level microdata: one shared record set so
+   Region + Sales Group + Sales Rep + Principal can be
+   filtered together with true AND logic.
+══════════════════════════════════════════════════ */
+const tradeMonths={'May 2026':{factor:1},'Apr 2026':{factor:0.88},'Mar 2026':{factor:0.76}};
+const STAGE_LABELS=['Hunting List','Approved Outlet','Active Execution','Proof Validation','Settlement'];
+const STAGE_COLORS=['#e0433c','#f2841f','#2f6fed','#2e8b45','#8b5cf6'];
+
+// Reference tables kept only as generation targets (population sizes + rates
+// used to bias the joint dataset) — the report's own Sales Rep total (160) and
+// Principal total (290) don't reconcile to 240 on their own, which is expected
+// for a sample dataset; see the note under the tables below.
+const tradeRegionPop=[{k:'North',n:100},{k:'Central',n:80},{k:'South',n:60}];
+const tradeSGPop=[{k:'WS-Central',n:90,rate:63.2},{k:'WS-North',n:70,rate:63.5},{k:'OT-South',n:50,rate:60.5},{k:'WS-South',n:20,rate:53.3},{k:'Modern Trade',n:10,rate:42.9}];
+const tradeRepPopNamed=[{k:'Le Tri Nguyen',n:40},{k:'Ly Tien Vinh',n:35},{k:'Phan Tu Quyen',n:32},{k:'Duong Quoc Linh',n:28},{k:'Luong Dinh Khang',n:25}];
+const tradePrincipalPopRaw=[{k:'The Macallan',n:60,rate:62.2},{k:'Proximo/Remy',n:50,rate:57.9},{k:'Jose Cuervo',n:50,rate:57.9},{k:'Campari',n:45,rate:58.8},{k:'Lucas Bols',n:45,rate:59.4},{k:'Jagermeister',n:40,rate:58.9}];
+const tradePrograms=[
+  {name:'The Viet Margarita',principal:'Proximo/Remy',brand:'Jose Cuervo/Cointreau',hunting:60,approved:45,settlement:38,rate:84.4},
+  {name:'Day of The Dead',principal:'Proximo',brand:'Jose Cuervo',hunting:50,approved:38,settlement:31,rate:81.6},
+  {name:'Campari Red Hands',principal:'Campari',brand:'Campari',hunting:45,approved:34,settlement:28,rate:82.4},
+  {name:'Bols Cocktail Bottle',principal:'Lucas Bols',brand:'Bols',hunting:45,approved:32,settlement:26,rate:81.3},
+  {name:'Oktoberfest',principal:'Jagermeister',brand:'Jagermeister',hunting:40,approved:31,settlement:27,rate:87.1}
+];
+
+const TOTAL_OUTLETS=240;
+// stage-only counts (not cumulative): Hunting-only 60, +Approved 30, +Active 30, +Proof 8, +Settlement 112 => cumulative 240/180/150/120/112
+const STAGE_ONLY_COUNTS=[60,30,30,8,112];
+
+let tradeJointData=[];
+(function buildTradeJointData(){
+  function popArray(popList, extra){
+    const arr=[];
+    popList.forEach(p=>{for(let i=0;i<p.n;i++)arr.push(p.k)});
+    if(extra) for(let i=0;i<extra.n;i++)arr.push(extra.k);
+    return arr;
+  }
+  function shuffle(arr, rnd){
+    const a=arr.slice();
+    for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+    return a;
+  }
+  // Principal population rescaled from 290 (raw table total) to 240
+  const rawTotal=tradePrincipalPopRaw.reduce((s,p)=>s+p.n,0);
+  let principalScaled=tradePrincipalPopRaw.map(p=>({k:p.k,n:Math.round(p.n*TOTAL_OUTLETS/rawTotal),rate:p.rate}));
+  let diff=TOTAL_OUTLETS-principalScaled.reduce((s,p)=>s+p.n,0);
+  principalScaled[0].n+=diff; // absorb rounding remainder
+
+  const regionArr=shuffle(popArray(tradeRegionPop), seededRandom(11));
+  const sgArr=shuffle(popArray(tradeSGPop), seededRandom(22));
+  const repArr=shuffle(popArray(tradeRepPopNamed,{k:'Unassigned',n:TOTAL_OUTLETS-tradeRepPopNamed.reduce((s,p)=>s+p.n,0)}), seededRandom(33));
+  const principalArr=shuffle(popArray(principalScaled), seededRandom(44));
+
+  const sgRateMap=Object.fromEntries(tradeSGPop.map(p=>[p.k,p.rate]));
+  const principalRateMap=Object.fromEntries(principalScaled.map(p=>[p.k,p.rate]));
+  const rnd=seededRandom(55);
+
+  const records=[];
+  for(let i=0;i<TOTAL_OUTLETS;i++){
+    const region=regionArr[i], salesGroup=sgArr[i], salesRep=repArr[i], principal=principalArr[i];
+    const score=(sgRateMap[salesGroup]+principalRateMap[principal])/2 + (rnd()-0.5)*15;
+    records.push({region,salesGroup,salesRep,principal,score,stageIndex:0});
+  }
+  // Rank by score desc, assign stages so cumulative counts hit 240/180/150/120/112 exactly
+  const ranked=records.slice().sort((a,b)=>b.score-a.score);
+  const cumThresholds=[]; // index where each stage tier ends
+  let running=0;
+  STAGE_ONLY_COUNTS.slice().reverse().forEach(n=>{running+=n;cumThresholds.push(running)}); // [112,120,150,180,240]
+  ranked.forEach((r,rank)=>{
+    if(rank<cumThresholds[0]) r.stageIndex=4;
+    else if(rank<cumThresholds[1]) r.stageIndex=3;
+    else if(rank<cumThresholds[2]) r.stageIndex=2;
+    else if(rank<cumThresholds[3]) r.stageIndex=1;
+    else r.stageIndex=0;
+  });
+  tradeJointData=records;
+})();
+
+function tradeActiveFilters(){
+  return {
+    region:document.getElementById('trade-f-region').value,
+    salesGroup:document.getElementById('trade-f-sg').value,
+    salesRep:document.getElementById('trade-f-rep').value,
+    principal:document.getElementById('trade-f-principal').value
+  };
+}
+function tradeMatch(r, f, exclude){
+  return (exclude==='region'||f.region==='All'||r.region===f.region)
+    && (exclude==='salesGroup'||f.salesGroup==='All'||r.salesGroup===f.salesGroup)
+    && (exclude==='salesRep'||f.salesRep==='All'||r.salesRep===f.salesRep)
+    && (exclude==='principal'||f.principal==='All'||r.principal===f.principal);
+}
+function stageCounts(records){
+  const c=[0,0,0,0,0];
+  records.forEach(r=>{for(let s=0;s<=r.stageIndex;s++)c[s]++});
+  return c; // [hunting,approved,active,proof,settlement] cumulative
+}
+
+function renderTrade(){
+  const month=document.getElementById('trade-f-month').value;
+  const factor=tradeMonths[month].factor;
+  const f=tradeActiveFilters();
+  const filtered=tradeJointData.filter(r=>tradeMatch(r,f,null));
+
+  const scopeNote=document.getElementById('trade-scope');
+  const parts=[];
+  if(f.region!=='All') parts.push('Region = '+f.region);
+  if(f.salesGroup!=='All') parts.push('Sales Group = '+f.salesGroup);
+  if(f.salesRep!=='All') parts.push('Sales Rep. = '+f.salesRep);
+  if(f.principal!=='All') parts.push('Principal = '+f.principal);
+  if(parts.length){scopeNote.style.display='inline-flex';scopeNote.innerHTML=`Showing: ${parts.join(' · ')} <button onclick="resetTradeFilters()">clear</button>`;}
+  else{scopeNote.style.display='none';}
+
+  const vals=stageCounts(filtered).map(v=>v*factor);
+  document.getElementById('trade-kpi-hunting').textContent=numFmt(vals[0]);
+  document.getElementById('trade-kpi-approved').textContent=numFmt(vals[1]);
+  document.getElementById('trade-kpi-active').textContent=numFmt(vals[2]);
+  document.getElementById('trade-kpi-proof').textContent=numFmt(vals[3]);
+  document.getElementById('trade-kpi-settle').textContent=numFmt(vals[4]);
+
+  let ph='<div class="pipeline">';
+  STAGE_LABELS.forEach((s,i)=>{ph+=`<div class="pipe-step" style="background:${STAGE_COLORS[i]};--pipe-color:${STAGE_COLORS[i]}"><div class="ps-label">${s}</div></div>`});
+  ph+='</div><div class="pipe-num-row">';
+  vals.forEach((v,i)=>{ph+=`<div style="color:${STAGE_COLORS[i]}">${numFmt(v)}</div>`});
+  ph+='</div><div class="pipe-caption">Outlets</div>';
+  document.getElementById('trade-pipeline').innerHTML=ph;
+
+  // cross-filtered "by X" grouping: apply every filter except the one being charted
+  function groupBy(dim, keys){
+    const excludeMap={region:'region',salesGroup:'salesGroup',salesRep:'salesRep',principal:'principal'};
+    const base=tradeJointData.filter(r=>tradeMatch(r,f,excludeMap[dim]));
+    return keys.map(k=>{
+      const sub=base.filter(r=>r[dim]===k);
+      const c=stageCounts(sub).map(v=>v*factor);
+      const rate=c[1]?Math.round(c[4]/c[1]*100*10)/10:0;
+      return {k,v:c,rate};
+    });
+  }
+
+  const regionData=groupBy('region', tradeRegionPop.map(p=>p.k));
+  const sgData=groupBy('salesGroup', tradeSGPop.map(p=>p.k));
+  const repData=groupBy('salesRep', [...tradeRepPopNamed.map(p=>p.k),'Unassigned']);
+  const principalData=groupBy('principal', tradePrincipalPopRaw.map(p=>p.k));
+
+  if(tradeCharts.region) tradeCharts.region.destroy();
+  tradeCharts.region=new Chart(document.getElementById('trade-regionChart'),{
+    type:'bar',
+    data:{labels:regionData.map(r=>r.k),datasets:STAGE_LABELS.map((s,i)=>({label:s,data:regionData.map(r=>Math.round(r.v[i])),backgroundColor:STAGE_COLORS[i]}))},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:9}}}},
+      scales:{x:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10}}},y:{grid:{display:false},ticks:{font:{size:10}}}}}
+  });
+  if(tradeCharts.sg) tradeCharts.sg.destroy();
+  tradeCharts.sg=new Chart(document.getElementById('trade-sgChart'),{
+    type:'bar',
+    data:{labels:sgData.map(r=>r.k),datasets:STAGE_LABELS.map((s,i)=>({label:s,data:sgData.map(r=>Math.round(r.v[i])),backgroundColor:STAGE_COLORS[i]}))},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:8,font:{size:9}}}},
+      scales:{x:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10}}},y:{grid:{display:false},ticks:{font:{size:10}}}}}
+  });
+
+  function fillDetailTable(elId, label, data){
+    let dh=`<tr><th>#</th><th>${label}</th><th class="r">Hunting</th><th class="r">Approved</th><th class="r">Active</th><th class="r">Proof</th><th class="r">Settlement</th><th class="r">Achv.</th></tr>`;
+    data.forEach((r,i)=>{
+      const activeVal = (label==='Region'?f.region:label==='Sales Group'?f.salesGroup:label==='Sales Rep.'?f.salesRep:f.principal);
+      const hl = activeVal===r.k ? ' class="hl"':'';
+      dh+=`<tr${hl}><td>${i+1}</td><td style="font-weight:600">${r.k}</td>${r.v.map(v=>`<td class="r">${numFmt(v)}</td>`).join('')}<td class="r"><span class="rate-pill" style="background:${pctColor(r.rate)}22;color:${pctColor(r.rate)}">${r.rate}%</span></td></tr>`;
+    });
+    const totals=[0,0,0,0,0].map((_,i)=>data.reduce((s,r)=>s+r.v[i],0));
+    const totRate=totals[1]?Math.round(totals[4]/totals[1]*100*10)/10:0;
+    dh+=`<tr class="total-row"><td colspan="2">Total</td>${totals.map(t=>`<td class="r">${numFmt(t)}</td>`).join('')}<td class="r">${totRate}%</td></tr>`;
+    document.getElementById(elId).innerHTML=dh;
+  }
+  fillDetailTable('trade-sgTbl','Sales Group',sgData);
+  fillDetailTable('trade-repTbl','Sales Rep.',repData);
+  fillDetailTable('trade-principalTbl','Principal',principalData);
+
+  const progTbl=document.getElementById('trade-programTbl');
+  const progFilterPrincipal=f.principal;
+  const filteredPrograms=tradePrograms.filter(p=>progFilterPrincipal==='All'||p.principal.includes(progFilterPrincipal)||progFilterPrincipal.includes(p.principal));
+  let pth='<tr><th>Program</th><th>Principal</th><th>Brand</th><th class="r">Hunting</th><th class="r">Approved</th><th class="r">Settlement</th><th class="r">Achievement</th></tr>';
+  const progRows = progFilterPrincipal==='All'?tradePrograms:(filteredPrograms.length?filteredPrograms:tradePrograms);
+  progRows.forEach(p=>{
+    pth+=`<tr><td style="font-weight:600">${p.name}</td><td>${p.principal}</td><td>${p.brand}</td><td class="r">${numFmt(p.hunting*factor)}</td><td class="r">${numFmt(p.approved*factor)}</td><td class="r">${numFmt(p.settlement*factor)}</td><td class="r"><span class="rate-pill" style="background:${pctColor(p.rate)}22;color:${pctColor(p.rate)}">${p.rate}%</span></td></tr>`;
+  });
+  const totH=progRows.reduce((s,p)=>s+p.hunting,0),totAp=progRows.reduce((s,p)=>s+p.approved,0),totS=progRows.reduce((s,p)=>s+p.settlement,0);
+  const totRate2=totAp?Math.round(totS/totAp*100*10)/10:0;
+  pth+=`<tr class="total-row"><td colspan="3">Total</td><td class="r">${numFmt(totH*factor)}</td><td class="r">${numFmt(totAp*factor)}</td><td class="r">${numFmt(totS*factor)}</td><td class="r">${totRate2}%</td></tr>`;
+  progTbl.innerHTML=pth;
+}
+let tradeCharts={};
+function resetTradeFilters(){
+  ['trade-f-region','trade-f-sg','trade-f-rep','trade-f-principal'].forEach(id=>document.getElementById(id).value='All');
+  renderTrade();
+}
+function buildTradeFilterBar(){
+  const el=document.getElementById('trade-filterbar');
+  el.innerHTML=
+    buildFilterGroup(1,'Time','trade-f-month',Object.keys(tradeMonths))+
+    buildFilterGroup(2,'Region','trade-f-region',['All',...tradeRegionPop.map(r=>r.k)])+
+    buildFilterGroup(3,'Sales Group','trade-f-sg',['All',...tradeSGPop.map(r=>r.k)])+
+    buildFilterGroup(4,'Sales Rep.','trade-f-rep',['All',...tradeRepPopNamed.map(r=>r.k),'Unassigned'])+
+    buildFilterGroup(5,'Principal','trade-f-principal',['All',...tradePrincipalPopRaw.map(r=>r.k)])+
+    `<button class="reset-btn" onclick="resetTradeFilters()">↺<span>Reset</span></button>`;
+  el.querySelectorAll('select').forEach(s=>s.addEventListener('change',renderTrade));
+}
+buildTradeFilterBar();
+renderTrade();
+
+/* ══════════════════════════════════════
+   BOM DATA (was: distribution / Tab 1)
+══════════════════════════════════════ */
+const products=['Aperol 0.7L','Bulldog 0.75L','Campari 0.75L','Campari Negroni RTD 0.5L','Kingston62 Gold 0.75L','Kingston62 White 0.75L','Skyy Vodka 0.18L','Skyy Vodka 0.75L','Wild Turkey 12yo 0.7L','Wild Turkey 81 0.75L','Wild Turkey 8yo 0.7L','Wild Turkey Rare Breed 0.75L','Wild Turkey Rye 0.7L','No 3 Gin 0.7L'];
+const segColors={CVS:'#2f6fed',Supermarket:'#C8102E',Minimart:'#f2841f','Liquor Store':'#8b5cf6',Ecom:'#e5942a','Department Store':'#8a8884'};
+const segBg={CVS:'#e8eefd',Supermarket:'#fbe7ea',Minimart:'#fdecdc','Liquor Store':'#efe9fe',Ecom:'#fdf0dd','Department Store':'#f0efec'};
+const segTx={CVS:'#1c47a3',Supermarket:'#8c0b20',Minimart:'#8a4c11','Liquor Store':'#4c2f96',Ecom:'#8a5711','Department Store':'#444441'};
+const ALL_SEGS=['CVS','Supermarket','Minimart','Liquor Store','Ecom','Department Store'];
+const L1=1,L2=2,RL='RL',BL='BL',Lx='L',RJ='RJ';
+const distRows=[
+  {seg:'CVS',name:'7-ELEVEN',fee:10000000,d:[L1,L1,L1,0,0,0,0,L1,L2,L1,L1,L2,L1,L1]},
+  {seg:'CVS',name:'CIRCLE K',fee:200000000,d:[0,RL,0,0,0,0,0,0,L2,L1,L1,L2,L2,L2]},
+  {seg:'CVS',name:'DIFULL K',fee:25000000,d:[0,0,0,0,0,0,0,0,L2,L1,L1,L2,L2,L2]},
+  {seg:'CVS',name:'VINMART+',fee:300000000,d:[0,0,0,0,0,0,0,0,L2,L1,L1,L2,L2,L2]},
+  {seg:'CVS',name:'FAMILY MART',fee:10000000,d:[L1,0,L1,0,0,0,0,0,L2,L1,L1,L2,L1,L1]},
+  {seg:'CVS',name:'GS 25',fee:18000000,d:[L1,0,L1,0,0,0,0,0,L2,L1,L1,L2,L2,L2]},
+  {seg:'CVS',name:'GS 25 Flagship',fee:18000000,d:[L1,0,L1,0,0,0,0,0,L2,L1,L1,L2,L2,L2]},
+  {seg:'CVS',name:'MINISTOP',fee:6000000,d:[L1,L1,L1,0,0,0,0,L1,L2,L1,L1,L2,L1,L1]},
+  {seg:'Department Store',name:'MEGA',fee:10000000,d:[L1,Lx,L1,L2,Lx,0,0,L2,L2,L1,L1,L2,L2,L2]},
+  {seg:'Ecom',name:'LAZADA',fee:0,d:[0,0,0,0,0,0,0,0,L2,L1,L1,L2,L2,0]},
+  {seg:'Ecom',name:'SHOPEE',fee:0,d:[0,0,0,0,0,0,0,0,L2,L1,L1,L2,L2,0]},
+  {seg:'Ecom',name:'TIKI',fee:0,d:[0,0,0,0,0,0,0,0,L2,L1,L1,L2,L2,0]},
+  {seg:'Liquor Store',name:'ATC WINE MERCHANT',fee:0,d:[L1,L1,L1,L1,L1,L1,0,L1,L1,L1,L1,L1,L1,L1]},
+  {seg:'Liquor Store',name:'DMS',fee:0,d:[0,0,0,0,0,0,0,0,L1,L1,L1,L1,L1,L1]},
+  {seg:'Liquor Store',name:'DUY ANH',fee:300000,d:[0,0,0,0,0,0,0,0,L1,L1,L1,L1,L1,L1]},
+  {seg:'CVS',name:'BINGO',fee:0,d:[0,0,0,0,0,0,0,0,L2,L1,L1,L2,L2,L2]},
+  {seg:'Liquor Store',name:'SASCO',fee:500000,d:[0,0,0,0,0,0,0,0,L1,L1,L1,L1,L1,L1]},
+  {seg:'Liquor Store',name:'SASCO (CSM)',fee:500000,d:[0,0,0,0,0,0,0,0,L1,L1,L1,L1,L1,L1]},
+  {seg:'Liquor Store',name:'EASCO CD',fee:0,d:[0,0,0,0,0,0,0,0,L1,L1,L1,L1,L1,L1]},
+  {seg:'Liquor Store',name:'WAREHOUSE',fee:6000000,d:[0,0,0,0,0,0,0,0,L1,L1,L1,L1,L1,L1]},
+  {seg:'Minimart',name:'FARMER',fee:300000,d:[L1,L1,L1,L2,L2,L2,L2,L2,L2,L1,L1,L2,L1,L1]},
+  {seg:'Minimart',name:'KING KONG',fee:1000000,d:[L1,L1,L1,L2,L2,L2,L2,L2,L2,L1,L1,L2,L1,L1]},
+  {seg:'Minimart',name:'MEGA MART',fee:10000000,d:[L1,L1,L1,L2,L2,L2,L2,L2,L2,L1,L1,L2,L1,L1]},
+  {seg:'Minimart',name:'MOONMILK',fee:0,d:[L1,L1,L1,L2,L2,L2,L2,L2,L2,L1,L1,L2,L1,L1]},
+  {seg:'Minimart',name:'NAM AN SUPERB',fee:2000000,d:[L2,Lx,L2,L2,Lx,0,L2,L2,L2,L1,L1,L2,L2,L2]},
+  {seg:'Supermarket',name:'AN NAM',fee:6000000,d:[L1,L1,L1,BL,RJ,RJ,L1,L1,L2,L1,L1,L2,L1,L1]},
+  {seg:'Supermarket',name:'AEON MALL',fee:7000000,d:[Lx,RL,L2,L2,Lx,L2,Lx,L1,L2,L1,L1,L2,L2,L2]},
+  {seg:'Supermarket',name:'BIG C/TOPS/GO',fee:30500000,d:[L2,Lx,L2,L2,Lx,L2,Lx,L1,L2,L1,L1,L2,L2,L2]},
+  {seg:'Supermarket',name:'TOPS CSM',fee:0,d:[L1,L1,L1,L2,L2,L1,L2,L2,L2,L1,L1,L2,L2,L2]},
+  {seg:'Supermarket',name:'COOPMART',fee:5000000,d:[L2,RJ,RJ,L2,L2,L2,L2,L2,L2,L1,L1,L2,L2,L2]},
+  {seg:'Supermarket',name:'COOPMART FL',fee:5000000,d:[L2,RJ,RJ,L2,L1,L2,L2,L2,L2,L1,L1,L2,L2,L2]},
+  {seg:'Supermarket',name:'EMART',fee:2000000,d:[L2,RJ,RJ,L2,L1,L1,L2,L2,L2,L1,L1,L2,L2,L2]},
+  {seg:'Supermarket',name:'FESTIVAL MARKET',fee:300000,d:[L1,L1,L1,L2,L1,BL,L1,L1,L2,L1,L1,L2,L2,L2]},
+  {seg:'Supermarket',name:'GENSHAI',fee:500000,d:[Lx,L2,L2,L2,L2,L2,L2,Lx,L2,L1,L1,L2,L2,L2]},
+  {seg:'Supermarket',name:'LONG BEACH',fee:0,d:[L1,L1,L1,L2,L2,L1,L1,L1,L2,L1,L1,L2,L2,L2]},
+  {seg:'Supermarket',name:'LOTTE',fee:8000000,d:[L1,RJ,BL,L1,L2,L2,L2,L1,Lx,RJ,L2,L2,L2,L2]},
+  {seg:'Supermarket',name:'MENAS',fee:0,d:[L1,L1,L1,L2,L2,L2,L2,L2,L2,L1,L1,L1,L1,L1]},
+  {seg:'Supermarket',name:'SATRA',fee:500000,d:[L2,Lx,L2,L2,L2,L2,L2,L2,L2,Lx,L2,L2,L2,L2]},
+  {seg:'Supermarket',name:'WINMART',fee:50000000,d:[L2,L2,L2,L2,Lx,L2,Lx,Lx,L2,Lx,L2,L2,L2,L2]},
+];
+function fmtFee(v){if(!v)return'—';if(v>=1e6)return(v/1e6).toFixed(1)+'M';if(v>=1000)return Math.round(v/1000)+'K';return v}
+
+/* ══════════════════════════════════════
+   BOD DATA (was: BOD / Tab 2)
+══════════════════════════════════════ */
+const MONTHS=['M1','M2','M3','M4','M5','M6','M7','M8','M9','M10','M11','M12'];
+const CHANNELS=ALL_SEGS;
+
+const partners=[
+  {
+    id:'botanist',name:'The Botanist Gin',producer:'Rémy Cointreau',color:'#8b5cf6',
+    sku:'The Botanist Gin 700ml',planYear:1200,
+    contract:'Volume rebate 130K–200K VND/bottle',
+    monthlyActual:[95,102,88,110,105,98,115,112,100,92,85,0],
+    deliveries:[
+      {outlet:'WINMART',seg:'Supermarket',actual:272,plan:204,status:'Exceeded',method:'Direct'},
+      {outlet:'BIG C/TOPS/GO',seg:'Supermarket',actual:188,plan:204,status:'On Track',method:'Direct'},
+      {outlet:'ATC WINE MERCHANT',seg:'Liquor Store',actual:204,plan:204,status:'Exceeded',method:'Direct'},
+      {outlet:'AEON MALL',seg:'Supermarket',actual:156,plan:180,status:'On Track',method:'Direct'},
+      {outlet:'COOPMART',seg:'Supermarket',actual:148,plan:180,status:'On Track',method:'Distributor'},
+      {outlet:'LOTTE',seg:'Supermarket',actual:108,plan:144,status:'At Risk',method:'Direct'},
+      {outlet:'MINISTOP',seg:'CVS',actual:120,plan:144,status:'At Risk',method:'Distributor'},
+      {outlet:'7-ELEVEN',seg:'CVS',actual:86,plan:144,status:'Behind',method:'Distributor'},
+    ]
+  },
+  {
+    id:'ladytrieu',name:'Lady Trieu Gin',producer:'Overproof Holdings',color:'#2e8b45',
+    sku:'Lady Trieu 5 SKUs 700ml',planYear:540,
+    contract:'180 bottles/year excl. FOC · 5 SKUs',
+    monthlyActual:[38,42,35,48,44,40,50,47,42,36,30,0],
+    deliveries:[
+      {outlet:'ATC WINE MERCHANT',seg:'Liquor Store',actual:60,plan:60,status:'Exceeded',method:'Direct'},
+      {outlet:'AEON MALL',seg:'Supermarket',actual:51,plan:60,status:'On Track',method:'Direct'},
+      {outlet:'SHOPEE',seg:'Ecom',actual:55,plan:48,status:'Exceeded',method:'Platform'},
+      {outlet:'LOTTE',seg:'Supermarket',actual:48,plan:60,status:'On Track',method:'Distributor'},
+      {outlet:'WAREHOUSE',seg:'Liquor Store',actual:46,plan:48,status:'On Track',method:'Direct'},
+      {outlet:'BIG C/TOPS/GO',seg:'Supermarket',actual:35,plan:60,status:'At Risk',method:'Direct'},
+      {outlet:'LAZADA',seg:'Ecom',actual:38,plan:48,status:'At Risk',method:'Platform'},
+    ]
+  },
+  {
+    id:'campari',name:'Campari Group',producer:'Campari Group Vietnam',color:'#f2841f',
+    sku:'Aperol / Campari / Kingston62 / Skyy',planYear:2400,
+    contract:'Annual volume contract · multi-SKU',
+    monthlyActual:[185,198,172,210,205,192,220,215,198,180,160,0],
+    deliveries:[
+      {outlet:'VINMART+',seg:'CVS',actual:380,plan:400,status:'On Track',method:'Direct'},
+      {outlet:'BIG C/TOPS/GO',seg:'Supermarket',actual:312,plan:360,status:'On Track',method:'Direct'},
+      {outlet:'COOPMART',seg:'Supermarket',actual:290,plan:300,status:'On Track',method:'Distributor'},
+      {outlet:'WINMART',seg:'Supermarket',actual:265,plan:300,status:'On Track',method:'Direct'},
+      {outlet:'AEON MALL',seg:'Supermarket',actual:248,plan:300,status:'On Track',method:'Direct'},
+      {outlet:'7-ELEVEN',seg:'CVS',actual:185,plan:240,status:'At Risk',method:'Distributor'},
+      {outlet:'CIRCLE K',seg:'CVS',actual:172,plan:240,status:'At Risk',method:'Distributor'},
+      {outlet:'LOTTE',seg:'Supermarket',actual:155,plan:180,status:'At Risk',method:'Direct'},
+      {outlet:'SHOPEE',seg:'Ecom',actual:128,plan:120,status:'Exceeded',method:'Platform'},
+    ]
+  },
+  {
+    id:'wildturkey',name:'Wild Turkey Portfolio',producer:'Beam Suntory VN',color:'#e5942a',
+    sku:'WT 12yo / 81 / 8yo / Rare Breed / Rye',planYear:900,
+    contract:'Tiered rebate · 5 SKUs · direct import',
+    monthlyActual:[68,75,62,80,78,70,85,82,74,65,58,0],
+    deliveries:[
+      {outlet:'ATC WINE MERCHANT',seg:'Liquor Store',actual:145,plan:144,status:'Exceeded',method:'Direct'},
+      {outlet:'WAREHOUSE',seg:'Liquor Store',actual:108,plan:120,status:'On Track',method:'Direct'},
+      {outlet:'DMS',seg:'Liquor Store',actual:96,plan:96,status:'On Track',method:'Direct'},
+      {outlet:'AEON MALL',seg:'Supermarket',actual:82,plan:96,status:'On Track',method:'Direct'},
+      {outlet:'WINMART',seg:'Supermarket',actual:75,plan:96,status:'At Risk',method:'Direct'},
+      {outlet:'LAZADA',seg:'Ecom',actual:60,plan:72,status:'At Risk',method:'Platform'},
+      {outlet:'BIG C/TOPS/GO',seg:'Supermarket',actual:55,plan:72,status:'Behind',method:'Distributor'},
+    ]
+  },
+  {
+    id:'no3gin',name:'No. 3 London Gin',producer:'Berry Bros. & Rudd',color:'#C8102E',
+    sku:'No. 3 London Dry Gin 700ml',planYear:360,
+    contract:'Annual listing · premium segment',
+    monthlyActual:[22,26,20,30,28,24,32,29,26,20,18,0],
+    deliveries:[
+      {outlet:'ATC WINE MERCHANT',seg:'Liquor Store',actual:48,plan:48,status:'On Track',method:'Direct'},
+      {outlet:'MEGA',seg:'Department Store',actual:38,plan:36,status:'Exceeded',method:'Direct'},
+      {outlet:'AEON MALL',seg:'Supermarket',actual:30,plan:36,status:'On Track',method:'Direct'},
+      {outlet:'WAREHOUSE',seg:'Liquor Store',actual:28,plan:36,status:'On Track',method:'Direct'},
+      {outlet:'GENSHAI',seg:'Supermarket',actual:20,plan:24,status:'At Risk',method:'Direct'},
+      {outlet:'LAZADA',seg:'Ecom',actual:15,plan:24,status:'Behind',method:'Platform'},
+    ]
+  },
+];
+
+function sPill(s){
+  const m={Exceeded:'background:#e6f4e9;color:#1c5a2c','On Track':'background:#e8eefd;color:#1c47a3','At Risk':'background:#fdf0dd;color:#8a5711',Behind:'background:#fbe6e4;color:#8f231e'};
+  return`<span class="status-pill" style="${m[s]||''}">${s}</span>`;
+}
+function mTag(m){
+  const mp={Direct:'background:#efe9fe;color:#4c2f96;border-color:#d4c8f7',Distributor:'background:#f0efec;color:#444441;border-color:#d3d1c7',Platform:'background:#fbe7ea;color:#8c0b20;border-color:#f2c1c9'};
+  return`<span class="method-tag" style="${mp[m]||'border-color:var(--border-md)'}">${m}</span>`;
+}
+function pBar(a,p,col){
+  const w=Math.min(100,Math.round(a/p*100));
+  const c=a>=p?'#2e8b45':w>=80?'#2f6fed':w>=60?'#e5942a':'#e0433c';
+  return`<span class="pbar-wrap"><span class="pbar-fill" style="width:${w}%;background:${col||c}"></span></span><span style="font-size:10px;color:var(--text-3);margin-left:4px">${w}%</span>`;
+}
+
+/* ══════════════════════════════════════
+   BOM CHARTS + FILTER BAR
+══════════════════════════════════════ */
+let bomActiveChannels=new Set(ALL_SEGS);
+let bomFeeTier='All';
+const segCount={};distRows.forEach(r=>{segCount[r.seg]=(segCount[r.seg]||0)+1});
+
+function buildBomFilterBar(){
+  const el=document.getElementById('bom-filterbar');
+  el.innerHTML=
+    buildFilterGroup(1,'Time','bom-f-time',['2026 YTD'])+
+    buildFilterGroup(2,'Fee Tier','bom-f-fee',['All','Free listing','Paid listing (<10M)','Paid listing (≥10M)'])+
+    `<button class="reset-btn" onclick="resetBomFilters()">↺<span>Reset</span></button>`;
+  document.getElementById('bom-f-fee').addEventListener('change',function(){bomFeeTier=this.value;renderBom()});
+}
+function resetBomFilters(){
+  bomActiveChannels=new Set(ALL_SEGS); bomFeeTier='All';
+  document.getElementById('bom-f-fee').value='All';
+  document.querySelectorAll('#segFilters .seg-btn').forEach(b=>b.classList.add('active'));
+  renderBom();
+}
+function feeTierMatch(fee){
+  if(bomFeeTier==='All') return true;
+  if(bomFeeTier==='Free listing') return fee===0;
+  if(bomFeeTier==='Paid listing (<10M)') return fee>0 && fee<10000000;
+  if(bomFeeTier==='Paid listing (≥10M)') return fee>=10000000;
+  return true;
+}
+function bomFilteredRows(){
+  return distRows.filter(r=>bomActiveChannels.has(r.seg) && feeTierMatch(r.fee));
+}
+
+let bomCharts={};
+function renderBom(){
+  const rows=bomFilteredRows();
+  document.getElementById('bom-kpi-total').textContent=rows.length;
+  document.getElementById('bom-kpi-total-sub').textContent=new Set(rows.map(r=>r.seg)).size+' channels shown';
+  document.getElementById('bom-kpi-sku').textContent=products.length;
+
+  const segValsMap={};ALL_SEGS.forEach(s=>segValsMap[s]=0);
+  rows.forEach(r=>segValsMap[r.seg]++);
+  const dl=document.getElementById('donut-legend');
+  dl.innerHTML='';
+  ALL_SEGS.forEach(s=>{dl.innerHTML+=`<span class="leg"><span class="leg-sq" style="background:${segColors[s]}"></span>${s} ${segValsMap[s]}</span>`});
+  if(bomCharts.seg) bomCharts.seg.destroy();
+  bomCharts.seg=new Chart(document.getElementById('segChart'),{type:'doughnut',data:{labels:ALL_SEGS,datasets:[{data:ALL_SEGS.map(s=>segValsMap[s]),backgroundColor:ALL_SEGS.map(s=>segColors[s]),borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${ctx.raw}`}}},cutout:'60%'}});
+
+  const smRows=rows.filter(r=>r.seg==='Supermarket'&&r.fee>0).sort((a,b)=>b.fee-a.fee);
+  if(bomCharts.fee) bomCharts.fee.destroy();
+  bomCharts.fee=new Chart(document.getElementById('feeChart'),{type:'bar',data:{labels:smRows.map(o=>o.name),datasets:[{data:smRows.map(o=>+(o.fee/1e6).toFixed(1)),backgroundColor:'#C8102E',borderRadius:4,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.raw}M VND`}}},scales:{x:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{font:{size:10},callback:v=>v+'M'}},y:{grid:{display:false},ticks:{font:{size:10}}}}}});
+
+  renderHM();
+}
+
+function cHTML(v){if(!v)return'<span class="cell c0"></span>';if(v===1)return'<span class="cell c1"></span>';if(v===2)return'<span class="cell c2"></span>';if(v==='RL')return'<span class="cell crl"></span>';if(v==='BL')return'<span class="cell cbl"></span>';if(v==='L')return'<span class="cell cl"></span>';if(v==='RJ')return'<span class="cell crj"></span>';return'<span class="cell c0"></span>'}
+function cLabel(v){if(!v)return'—';if(v===1)return'Listed';if(v===2)return'Listed (2)';return v}
+function renderHM(){
+  const f=bomFilteredRows();
+  const tbl=document.getElementById('heatTable');
+  let h='<thead class="chdr"><tr><th class="f1">Channel</th><th class="f2">Outlet</th><th class="f3">Fee</th>';
+  products.forEach(p=>{h+=`<th title="${p}"><span class="prod-label">${p}</span></th>`});
+  h+='</tr></thead><tbody>';
+  f.forEach(r=>{
+    h+=`<tr class="dr"><td class="f1"><span class="seg-tag" style="background:${segBg[r.seg]};color:${segTx[r.seg]}">${r.seg}</span></td><td class="f2" title="${r.name}">${r.name}</td><td class="f3">${fmtFee(r.fee)}</td>`;
+    r.d.forEach((v,i)=>{h+=`<td data-p="${products[i]}" data-o="${r.name}" data-v="${cLabel(v)}">${cHTML(v)}</td>`});
+    h+='</tr>';
+  });
+  if(!f.length) h+='<tr><td colspan="17" style="text-align:center;color:var(--text-3);padding:16px">No outlets match the selected filters</td></tr>';
+  tbl.innerHTML=h+'</tbody>';
+  tbl.querySelectorAll('td[data-p]').forEach(td=>{
+    td.addEventListener('mouseenter',()=>{document.getElementById('tip-o').textContent=td.dataset.o;document.getElementById('tip-p').textContent=td.dataset.p;document.getElementById('tip-v').textContent=td.dataset.v;document.getElementById('tip').style.display='block'});
+    td.addEventListener('mousemove',e=>{const t=document.getElementById('tip');t.style.left=(e.clientX+14)+'px';t.style.top=(e.clientY-10)+'px'});
+    td.addEventListener('mouseleave',()=>{document.getElementById('tip').style.display='none'});
+  });
+}
+function buildChannelChips(){
+  const w=document.getElementById('segFilters');
+  w.innerHTML='<span style="font-size:11px;color:var(--text-3);margin-right:4px">Channel:</span>';
+  const aBtn=document.createElement('button');aBtn.className='seg-btn active';aBtn.textContent='All';
+  aBtn.onclick=()=>{bomActiveChannels=new Set(ALL_SEGS);w.querySelectorAll('.seg-btn').forEach(b=>b.classList.add('active'));renderBom()};
+  w.appendChild(aBtn);
+  ALL_SEGS.forEach(s=>{
+    const b=document.createElement('button');b.className='seg-btn active';b.textContent=s;b.style.cssText=`border-color:${segColors[s]}40`;
+    b.onclick=()=>{if(bomActiveChannels.has(s)){if(bomActiveChannels.size===1)return;bomActiveChannels.delete(s);b.classList.remove('active')}else{bomActiveChannels.add(s);b.classList.add('active')}aBtn.classList.toggle('active',bomActiveChannels.size===ALL_SEGS.length);renderBom()};
+    w.appendChild(b);
+  });
+}
+buildBomFilterBar();
+buildChannelChips();
+renderBom();
+
+/* ══════════════════════════════════════
+   BOD CHARTS + FILTER BAR
+══════════════════════════════════════ */
+let bodFilters={partner:'all',channel:'All',status:'All'};
+
+function buildBodFilterBar(){
+  const el=document.getElementById('bod-filterbar');
+  el.innerHTML=
+    buildFilterGroup(1,'Time','bod-f-time',['2026 YTD'])+
+    buildFilterGroup(2,'Partner','bod-f-partner',['All',...partners.map(p=>p.name)])+
+    buildFilterGroup(3,'Channel','bod-f-channel',['All',...ALL_SEGS])+
+    buildFilterGroup(4,'Status','bod-f-status',['All','Exceeded','On Track','At Risk','Behind'])+
+    `<button class="reset-btn" onclick="resetBodFilters()">↺<span>Reset</span></button>`;
+  document.getElementById('bod-f-partner').addEventListener('change',function(){bodFilters.partner=this.value==='All'?'all':this.value;renderDetail();syncBodScope()});
+  document.getElementById('bod-f-channel').addEventListener('change',function(){bodFilters.channel=this.value;renderDetail();syncBodScope()});
+  document.getElementById('bod-f-status').addEventListener('change',function(){bodFilters.status=this.value;renderDetail();syncBodScope()});
+}
+function resetBodFilters(){
+  bodFilters={partner:'all',channel:'All',status:'All'};
+  document.getElementById('bod-f-partner').value='All';
+  document.getElementById('bod-f-channel').value='All';
+  document.getElementById('bod-f-status').value='All';
+  document.querySelectorAll('#partnerFilters [data-pid]').forEach(b=>b.classList.toggle('active',b.dataset.pid==='all'));
+  renderDetail(); syncBodScope();
+}
+function syncBodScope(){
+  const note=document.getElementById('bod-scope');
+  const parts=[];
+  if(bodFilters.partner!=='all') parts.push('Partner = '+bodFilters.partner);
+  if(bodFilters.channel!=='All') parts.push('Channel = '+bodFilters.channel);
+  if(bodFilters.status!=='All') parts.push('Status = '+bodFilters.status);
+  if(parts.length){note.style.display='inline-flex';note.innerHTML=`Showing: ${parts.join(' · ')} <button onclick="resetBodFilters()">clear</button>`;}
+  else{note.style.display='none';}
+}
+
+(function(){
+  const totalActual=partners.reduce((s,p)=>s+p.monthlyActual.reduce((a,b)=>a+b,0),0);
+  const totalPlan=partners.reduce((s,p)=>s+p.planYear,0);
+  const riskCount=[...new Set(partners.flatMap(p=>p.deliveries.filter(d=>d.status==='Behind'||d.status==='At Risk').map(d=>d.outlet)))].length;
+  document.getElementById('kpi-total').textContent=numFmt(totalActual);
+  document.getElementById('kpi-plan').textContent=numFmt(totalPlan);
+  document.getElementById('kpi-pct').textContent=Math.round(totalActual/totalPlan*100)+'%';
+  document.getElementById('kpi-risk').textContent=riskCount;
+})();
+
+(function(){
+  const planMonth=partners.reduce((s,p)=>s+Math.round(p.planYear/12),0);
+  const cumPlan=[],cumAct=[];
+  let sp=0,sa=0;
+  for(let i=0;i<12;i++){
+    sp+=planMonth;
+    const monthAct=partners.reduce((s,p)=>s+(p.monthlyActual[i]||0),0);
+    sa+=monthAct;
+    cumPlan.push(sp);
+    cumAct.push(sa);
+  }
+  document.getElementById('line-legend').innerHTML=`<span class="leg"><span class="leg-sq" style="background:#8b5cf6"></span>Actual (cumulative)</span><span class="leg"><span class="leg-sq" style="background:#c9c7c2;border:.5px dashed #888"></span>Plan (cumulative)</span>`;
+  new Chart(document.getElementById('lineChart'),{
+    type:'line',
+    data:{labels:MONTHS,datasets:[
+      {label:'Actual',data:cumAct,borderColor:'#8b5cf6',backgroundColor:'rgba(139,92,246,0.08)',tension:.35,pointRadius:3,pointHoverRadius:5,fill:true},
+      {label:'Plan',data:cumPlan,borderColor:'#c9c7c2',borderDash:[5,4],backgroundColor:'transparent',tension:.1,pointRadius:0,pointHoverRadius:4}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${numFmt(ctx.raw)} bottles`}}},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},callback:v=>numFmt(v)}}}}
+  });
+})();
+
+(function(){
+  const outletMap={};
+  partners.forEach(p=>p.deliveries.forEach(d=>{
+    if(!outletMap[d.outlet])outletMap[d.outlet]={actual:0,plan:0};
+    outletMap[d.outlet].actual+=d.actual;
+    outletMap[d.outlet].plan+=d.plan;
+  }));
+  const sorted=Object.entries(outletMap).sort((a,b)=>b[1].actual-a[1].actual).slice(0,10);
+  const oColors=sorted.map(e=>{const r=e[1].actual/e[1].plan;return r>=1?'#2e8b45':r>=0.8?'#2f6fed':r>=0.6?'#e5942a':'#e0433c'});
+  const oPcts=sorted.map(e=>Math.round(e[1].actual/e[1].plan*100));
+
+  const outletCard=document.getElementById('outletBar').closest('.card');
+  const legDiv=document.createElement('div');
+  legDiv.style.cssText='display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--text-2);margin-bottom:10px;align-items:center';
+  legDiv.innerHTML=`
+    <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#2e8b45;display:inline-block"></span>Exceeded ≥100%</span>
+    <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#2f6fed;display:inline-block"></span>On Track ≥80%</span>
+    <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#e5942a;display:inline-block"></span>At Risk ≥60%</span>
+    <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#e0433c;display:inline-block"></span>Behind &lt;60%</span>
+    <span style="display:flex;align-items:center;gap:4px;margin-left:4px"><span style="width:10px;height:10px;border-radius:2px;background:rgba(180,178,169,0.5);border:.5px solid #b4b2a9;display:inline-block"></span>Plan</span>`;
+  outletCard.insertBefore(legDiv, document.getElementById('outletBar').parentElement);
+
+  new Chart(document.getElementById('outletBar'),{
+    type:'bar',
+    data:{
+      labels:sorted.map(e=>e[0]),
+      datasets:[
+        {label:'Actual',data:sorted.map(e=>e[1].actual),backgroundColor:oColors,borderRadius:3,borderSkipped:false},
+        {label:'Plan',data:sorted.map(e=>e[1].plan),backgroundColor:'rgba(180,178,169,0.25)',borderColor:'#b4b2a9',borderWidth:.5,borderRadius:3,borderSkipped:false}
+      ]
+    },
+    options:{
+      indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{
+        const e=sorted[ctx.dataIndex];
+        const pct=oPcts[ctx.dataIndex];
+        if(ctx.datasetIndex===0)return [' Actual: '+numFmt(ctx.raw)+' bottles',' Rate: '+pct+'%'];
+        return ' Plan: '+numFmt(ctx.raw)+' bottles';
+      }}}},
+      scales:{
+        x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10}}},
+        y:{grid:{display:false},ticks:{font:{size:10}}}
+      }
+    }
+  });
+})();
+
+(function(){
+  const labels=partners.map(p=>p.name);
+  const actuals=partners.map(p=>p.monthlyActual.reduce((a,b)=>a+b,0));
+  const colors=partners.map(p=>p.color);
+  const leg=document.getElementById('partner-donut-legend');
+  partners.forEach((p,i)=>{leg.innerHTML+=`<span class="leg"><span class="leg-sq" style="background:${p.color}"></span>${p.name.split(' ').slice(0,2).join(' ')} ${actuals[i]}</span>`});
+  new Chart(document.getElementById('partnerDonut'),{
+    type:'doughnut',
+    data:{labels,datasets:[{data:actuals,backgroundColor:colors,borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${ctx.raw} bottles`}}},cutout:'58%'}
+  });
+})();
+
+(function(){
+  const labels=partners.map(p=>p.name.split(' ').slice(0,2).join(' '));
+  const actuals=partners.map(p=>p.monthlyActual.reduce((a,b)=>a+b,0));
+  const plans=partners.map(p=>p.planYear);
+  const pcts=actuals.map((a,i)=>Math.round(a/plans[i]*100));
+  const barColors=actuals.map((a,i)=>a>=plans[i]?'#2e8b45':a/plans[i]>=0.8?'#2f6fed':a/plans[i]>=0.6?'#e5942a':'#e0433c');
+  new Chart(document.getElementById('partnerBar'),{
+    type:'bar',
+    data:{
+      labels,
+      datasets:[
+        {label:'Actual',data:actuals,backgroundColor:barColors,borderRadius:3,borderSkipped:false,yAxisID:'y',order:2},
+        {label:'Plan',data:plans,backgroundColor:'rgba(180,178,169,0.25)',borderColor:'#b4b2a9',borderWidth:.5,borderRadius:3,borderSkipped:false,yAxisID:'y',order:3},
+        {label:'Completion %',data:pcts,type:'line',borderColor:'#181818',backgroundColor:'transparent',tension:.3,pointRadius:4,pointHoverRadius:6,pointBackgroundColor:pcts.map(v=>v>=100?'#2e8b45':v>=80?'#2f6fed':v>=60?'#e5942a':'#e0433c'),borderWidth:1.5,yAxisID:'y2',order:1}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{
+        if(ctx.dataset.label==='Completion %')return ' Completion: '+ctx.raw+'%';
+        return ' '+ctx.dataset.label+': '+numFmt(ctx.raw)+' bottles';
+      }}}},
+      scales:{
+        x:{grid:{display:false},ticks:{font:{size:10},maxRotation:20}},
+        y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},callback:v=>numFmt(v)},title:{display:true,text:'Bottles',font:{size:9},color:'#9a9793'}},
+        y2:{position:'right',min:0,max:140,grid:{display:false},ticks:{font:{size:10},callback:v=>v+'%'},title:{display:true,text:'Completion %',font:{size:9},color:'#9a9793'}}
+      }
+    }
+  });
+})();
+
+(function(){
+  const matrix={};
+  partners.forEach(p=>{
+    matrix[p.id]={};
+    CHANNELS.forEach(ch=>{matrix[p.id][ch]=0});
+    p.deliveries.forEach(d=>{matrix[p.id][d.seg]=(matrix[p.id][d.seg]||0)+d.actual});
+  });
+  const allVals=partners.flatMap(p=>CHANNELS.map(ch=>matrix[p.id][ch]));
+  const maxVal=Math.max(...allVals);
+
+  function heatColor(v,max){
+    if(!v)return{bg:'#f4f4f2',tx:'#9a9793'};
+    const pct=v/max;
+    if(pct<.2)return{bg:'#fbe7ea',tx:'#8c0b20'};
+    if(pct<.4)return{bg:'#f2a3ac',tx:'#8c0b20'};
+    if(pct<.6)return{bg:'#C8102E',tx:'#fff'};
+    if(pct<.8)return{bg:'#a30d24',tx:'#fff'};
+    return{bg:'#8c0b20',tx:'#fff'};
+  }
+
+  let h='<thead><tr><th class="left">Mfg. Partner</th>';
+  CHANNELS.forEach(ch=>{h+=`<th>${ch}</th>`});
+  h+='<th>Total</th></tr></thead><tbody>';
+  partners.forEach(p=>{
+    const rowTotal=CHANNELS.reduce((s,ch)=>s+matrix[p.id][ch],0);
+    h+=`<tr><td class="left"><span style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:50%;background:${p.color};flex-shrink:0"></span>${p.name}</span></td>`;
+    CHANNELS.forEach(ch=>{
+      const v=matrix[p.id][ch];
+      const {bg,tx}=heatColor(v,maxVal);
+      h+=`<td><span class="heat-cell" style="background:${bg};color:${tx}">${v||'—'}</span></td>`;
+    });
+    const {bg:tbg,tx:ttx}=heatColor(rowTotal,partners.reduce((s,p2)=>s+CHANNELS.reduce((ss,ch)=>ss+matrix[p2.id][ch],0),0)/partners.length*1.5);
+    h+=`<td><span class="heat-cell" style="background:${tbg};color:${ttx};font-weight:700">${numFmt(rowTotal)}</span></td></tr>`;
+  });
+  h+='<tr style="background:var(--surface2)"><td class="left" style="font-weight:600;color:var(--text-2)">Total by Channel</td>';
+  let grandTotal=0;
+  CHANNELS.forEach(ch=>{
+    const chTotal=partners.reduce((s,p)=>s+matrix[p.id][ch],0);
+    grandTotal+=chTotal;
+    h+=`<td style="font-weight:600;font-size:11px">${numFmt(chTotal)||'—'}</td>`;
+  });
+  h+=`<td style="font-weight:700">${numFmt(grandTotal)}</td></tr>`;
+  document.getElementById('bodHmTable').innerHTML=h+'</tbody>';
+})();
+
+(function(){
+  const wrap=document.getElementById('accordionWrap');
+  let filterHTML='<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px" id="partnerFilters">';
+  filterHTML+='<span style="font-size:11px;color:var(--text-3)">Partner:</span>';
+  filterHTML+='<button class="seg-btn active" data-pid="all">All</button>';
+  partners.forEach(p=>{
+    filterHTML+=`<button class="seg-btn" data-pid="${p.id}" style="border-color:${p.color}40"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${p.color};margin-right:4px;vertical-align:middle"></span>${p.name.split(' ').slice(0,2).join(' ')}</button>`;
+  });
+  filterHTML+='</div>';
+
+  filterHTML+=`<div style="display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--text-2);margin-bottom:10px;align-items:center">
+    <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#2e8b45;display:inline-block"></span>Exceeded (≥100%)</span>
+    <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#2f6fed;display:inline-block"></span>On Track (≥80%)</span>
+    <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#e5942a;display:inline-block"></span>At Risk (≥60%)</span>
+    <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#e0433c;display:inline-block"></span>Behind (&lt;60%)</span>
+  </div>`;
+
+  filterHTML+=`<div class="scroll-wrap" style="max-height:480px">
+    <table class="bod-tbl" id="detailTable">
+      <thead><tr>
+        <th>Mfg. Partner</th>
+        <th>Outlet</th>
+        <th>Channel</th>
+        <th class="r">Actual</th>
+        <th class="r">Plan</th>
+        <th class="r">+/−</th>
+        <th style="min-width:130px">vs. Plan</th>
+        <th>Status</th>
+        <th>Method</th>
+      </tr></thead>
+      <tbody id="detailTbody"></tbody>
+    </table>
+  </div>`;
+
+  wrap.innerHTML=filterHTML;
+
+  const allRows=[];
+  partners.forEach(p=>{
+    p.deliveries.forEach(d=>{
+      allRows.push({...d,partnerId:p.id,partnerName:p.name,partnerColor:p.color,partnerShort:p.name.split(' ').slice(0,2).join(' ')});
+    });
+  });
+
+  window.renderDetail=function(){
+    const pid=bodFilters.partner;
+    let rows=pid==='all'?allRows:allRows.filter(r=>r.partnerId===pid);
+    if(bodFilters.channel!=='All') rows=rows.filter(r=>r.seg===bodFilters.channel);
+    if(bodFilters.status!=='All') rows=rows.filter(r=>r.status===bodFilters.status);
+    const tbody=document.getElementById('detailTbody');
+    if(!rows.length){tbody.innerHTML='<tr><td colspan="9" style="text-align:center;color:var(--text-3);padding:24px">No data matches the selected filters</td></tr>';return}
+
+    const grouped={};
+    rows.forEach(r=>{
+      if(!grouped[r.partnerId])grouped[r.partnerId]={rows:[],p:r};
+      grouped[r.partnerId].rows.push(r);
+    });
+
+    let h='';
+    Object.values(grouped).forEach(g=>{
+      const subAct=g.rows.reduce((s,d)=>s+d.actual,0);
+      const subPlan=g.rows.reduce((s,d)=>s+d.plan,0);
+      const subPct=Math.round(subAct/subPlan*100);
+      const subDiff=subAct-subPlan;
+      const subDiffFmt=(subDiff>=0?'+':'')+numFmt(subDiff);
+      const subDiffColor=subDiff>=0?'#2e8b45':'#e0433c';
+
+      h+=`<tr style="background:var(--surface2);border-top:1px solid var(--border-md)">
+        <td colspan="3" style="padding:7px 12px">
+          <span style="display:inline-flex;align-items:center;gap:6px;font-weight:600">
+            <span style="width:8px;height:8px;border-radius:50%;background:${g.p.partnerColor};flex-shrink:0"></span>
+            ${g.p.partnerName}
+          </span>
+        </td>
+        <td class="r" style="font-weight:600">${numFmt(subAct)}</td>
+        <td class="r" style="color:var(--text-2)">${numFmt(subPlan)}</td>
+        <td class="r" style="font-weight:600;color:${subDiffColor}">${subDiffFmt}</td>
+        <td colspan="3">
+          <span class="pbar-wrap" style="width:90px"><span class="pbar-fill" style="width:${Math.min(100,subPct)}%;background:${g.p.partnerColor}"></span></span>
+          <span style="font-size:10px;margin-left:4px;font-weight:600">${subPct}%</span>
+        </td>
+      </tr>`;
+
+      g.rows.forEach(d=>{
+        const pct=Math.round(d.actual/d.plan*100);
+        const diff=d.actual-d.plan;
+        const diffFmt=(diff>=0?'+':'')+numFmt(diff);
+        const diffColor=diff>=0?'#2e8b45':'#e0433c';
+        const barColor=pct>=100?'#2e8b45':pct>=80?'#2f6fed':pct>=60?'#e5942a':'#e0433c';
+        h+=`<tr>
+          <td style="color:var(--text-3);font-size:10px;padding-left:24px">${d.partnerShort}</td>
+          <td style="font-weight:600">${d.outlet}</td>
+          <td><span class="seg-tag" style="background:${segBg[d.seg]};color:${segTx[d.seg]}">${d.seg}</span></td>
+          <td class="r" style="font-weight:600">${numFmt(d.actual)}</td>
+          <td class="r" style="color:var(--text-2)">${numFmt(d.plan)}</td>
+          <td class="r" style="color:${diffColor};font-weight:600">${diffFmt}</td>
+          <td>
+            <span class="pbar-wrap" style="width:90px"><span class="pbar-fill" style="width:${Math.min(100,pct)}%;background:${barColor}"></span></span>
+            <span style="font-size:10px;color:var(--text-3);margin-left:4px">${pct}%</span>
+          </td>
+          <td>${sPill(d.status)}</td>
+          <td>${mTag(d.method)}</td>
+        </tr>`;
+      });
+    });
+
+    if(rows.length>1){
+      const gAct=rows.reduce((s,d)=>s+d.actual,0);
+      const gPlan=rows.reduce((s,d)=>s+d.plan,0);
+      const gPct=Math.round(gAct/gPlan*100);
+      const gDiff=gAct-gPlan;
+      h+=`<tr class="total-row">
+        <td colspan="3">Grand Total</td>
+        <td class="r">${numFmt(gAct)}</td>
+        <td class="r">${numFmt(gPlan)}</td>
+        <td class="r" style="color:${gDiff>=0?'#2e8b45':'#e0433c'};font-weight:600">${(gDiff>=0?'+':'')+numFmt(gDiff)}</td>
+        <td colspan="3">
+          <span class="pbar-wrap" style="width:90px"><span class="pbar-fill" style="width:${Math.min(100,gPct)}%;background:${gPct>=100?'#2e8b45':gPct>=80?'#2f6fed':gPct>=60?'#e5942a':'#e0433c'}"></span></span>
+          <span style="font-size:10px;font-weight:600;margin-left:4px">${gPct}%</span>
+        </td>
+      </tr>`;
+    }
+    tbody.innerHTML=h;
+  }
+
+  renderDetail();
+  document.getElementById('partnerFilters').addEventListener('click',e=>{
+    const btn=e.target.closest('[data-pid]');
+    if(!btn)return;
+    bodFilters.partner=btn.dataset.pid;
+    document.getElementById('bod-f-partner').value = btn.dataset.pid==='all' ? 'All' : partners.find(p=>p.id===btn.dataset.pid).name;
+    document.querySelectorAll('#partnerFilters [data-pid]').forEach(b=>{
+      b.classList.toggle('active',b.dataset.pid===bodFilters.partner);
+    });
+    renderDetail();
+    syncBodScope();
+  });
+})();
+
+buildBodFilterBar();
+</script>
+</body>
+</html>
