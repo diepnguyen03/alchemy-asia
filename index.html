@@ -1898,22 +1898,25 @@ function pBar(a,p,col){
 /* ══════════════════════════════════════
    BOM CHARTS + FILTER BAR
 ══════════════════════════════════════ */
-let bomActiveChannels=new Set(ALL_SEGS);
 let bomFeeTier='All';
+let bomFeeChannel='Supermarket'; // default analysis focus: Supermarket channel ('All' = no channel filter)
 const segCount={};distRows.forEach(r=>{segCount[r.seg]=(segCount[r.seg]||0)+1});
 
 function buildBomFilterBar(){
   const el=document.getElementById('bom-filterbar');
   el.innerHTML=
     buildFilterGroup(1,'Time','bom-f-time',['2026 YTD'])+
-    buildFilterGroup(2,'Fee Tier','bom-f-fee',['All','Free listing','Paid listing (<10M)','Paid listing (≥10M)'])+
+    buildFilterGroup(2,'Channel Focus','bom-f-feechannel',['All',...ALL_SEGS])+
+    buildFilterGroup(3,'Fee Tier','bom-f-fee',['All','Free listing','Paid listing (<10M)','Paid listing (≥10M)'])+
     `<button class="reset-btn" onclick="resetBomFilters()">↺<span>Reset</span></button>`;
+  document.getElementById('bom-f-feechannel').value='Supermarket';
+  document.getElementById('bom-f-feechannel').addEventListener('change',function(){bomFeeChannel=this.value;renderBom()});
   document.getElementById('bom-f-fee').addEventListener('change',function(){bomFeeTier=this.value;renderBom()});
 }
 function resetBomFilters(){
-  bomActiveChannels=new Set(ALL_SEGS); bomFeeTier='All';
+  bomFeeTier='All'; bomFeeChannel='Supermarket';
   document.getElementById('bom-f-fee').value='All';
-  document.querySelectorAll('#segFilters .seg-btn').forEach(b=>b.classList.add('active'));
+  document.getElementById('bom-f-feechannel').value='Supermarket';
   renderBom();
 }
 function feeTierMatch(fee){
@@ -1923,26 +1926,38 @@ function feeTierMatch(fee){
   if(bomFeeTier==='Paid listing (≥10M)') return fee>=10000000;
   return true;
 }
+// Single source of truth for BOM: Channel Focus + Fee Tier together scope the
+// table, heatmap AND the fee chart, so switching the dropdown updates all three.
 function bomFilteredRows(){
-  return distRows.filter(r=>bomActiveChannels.has(r.seg) && feeTierMatch(r.fee));
+  return distRows.filter(r=>(bomFeeChannel==='All'||r.seg===bomFeeChannel) && feeTierMatch(r.fee));
+}
+// The channel-mix donut always shows the full breakdown (still respects Fee Tier)
+// so the person can see where the current Channel Focus sits within the whole picture.
+function bomDonutRows(){
+  return distRows.filter(r=>feeTierMatch(r.fee));
 }
 
 let bomCharts={};
+
 function renderBom(){
   const rows=bomFilteredRows();
   document.getElementById('bom-kpi-total').textContent=rows.length;
   document.getElementById('bom-kpi-total-sub').textContent=new Set(rows.map(r=>r.seg)).size+' channels shown';
   document.getElementById('bom-kpi-sku').textContent=products.length;
 
+  const donutRows=bomDonutRows();
   const segValsMap={};ALL_SEGS.forEach(s=>segValsMap[s]=0);
-  rows.forEach(r=>segValsMap[r.seg]++);
+  donutRows.forEach(r=>segValsMap[r.seg]++);
   const dl=document.getElementById('donut-legend');
   dl.innerHTML='';
   ALL_SEGS.forEach(s=>{dl.innerHTML+=`<span class="leg"><span class="leg-sq" style="background:${segColors[s]}"></span>${s} ${segValsMap[s]}</span>`});
   if(bomCharts.seg) bomCharts.seg.destroy();
   bomCharts.seg=new Chart(document.getElementById('segChart'),{type:'doughnut',data:{labels:ALL_SEGS,datasets:[{data:ALL_SEGS.map(s=>segValsMap[s]),backgroundColor:ALL_SEGS.map(s=>segColors[s]),borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${ctx.raw}`}}},cutout:'60%'}});
 
-  const smRows=rows.filter(r=>r.seg==='Supermarket'&&r.fee>0).sort((a,b)=>b.fee-a.fee);
+  // rows is already scoped to the selected Channel Focus (or all channels if 'All') — no need to re-filter by seg here.
+  const smRows=rows.filter(r=>r.fee>0).sort((a,b)=>b.fee-a.fee);
+  const feeHdr=document.getElementById('feeChart').closest('.panel')?.querySelector('.panel-hdr, .card-title');
+  if(feeHdr) feeHdr.textContent='Listing Fee — '+(bomFeeChannel==='All'?'All Channels':bomFeeChannel);
   if(bomCharts.fee) bomCharts.fee.destroy();
   bomCharts.fee=new Chart(document.getElementById('feeChart'),{type:'bar',data:{labels:smRows.map(o=>o.name),datasets:[{data:smRows.map(o=>+(o.fee/1e6).toFixed(1)),backgroundColor:'#2e8b45',borderRadius:4,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.raw}M VND`}}},scales:{x:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{font:{size:10},callback:v=>v+'M'}},y:{grid:{display:false},ticks:{font:{size:10}}}}}});
 
@@ -1970,20 +1985,8 @@ function renderHM(){
     td.addEventListener('mouseleave',()=>{document.getElementById('tip').style.display='none'});
   });
 }
-function buildChannelChips(){
-  const w=document.getElementById('segFilters');
-  w.innerHTML='<span style="font-size:11px;color:var(--text-3);margin-right:4px">Channel:</span>';
-  const aBtn=document.createElement('button');aBtn.className='seg-btn active';aBtn.textContent='All';
-  aBtn.onclick=()=>{bomActiveChannels=new Set(ALL_SEGS);w.querySelectorAll('.seg-btn').forEach(b=>b.classList.add('active'));renderBom()};
-  w.appendChild(aBtn);
-  ALL_SEGS.forEach(s=>{
-    const b=document.createElement('button');b.className='seg-btn active';b.textContent=s;b.style.cssText=`border-color:${segColors[s]}40`;
-    b.onclick=()=>{if(bomActiveChannels.has(s)){if(bomActiveChannels.size===1)return;bomActiveChannels.delete(s);b.classList.remove('active')}else{bomActiveChannels.add(s);b.classList.add('active')}aBtn.classList.toggle('active',bomActiveChannels.size===ALL_SEGS.length);renderBom()};
-    w.appendChild(b);
-  });
-}
+
 buildBomFilterBar();
-buildChannelChips();
 renderBom();
 
 /* ══════════════════════════════════════
@@ -1999,9 +2002,14 @@ function buildBodFilterBar(){
     buildFilterGroup(3,'Channel','bod-f-channel',['All',...ALL_SEGS])+
     buildFilterGroup(4,'Status','bod-f-status',['All','Exceeded','On Track','At Risk','Behind'])+
     `<button class="reset-btn" onclick="resetBodFilters()">↺<span>Reset</span></button>`;
-  document.getElementById('bod-f-partner').addEventListener('change',function(){bodFilters.partner=this.value==='All'?'all':this.value;renderDetail();syncBodScope()});
-  document.getElementById('bod-f-channel').addEventListener('change',function(){bodFilters.channel=this.value;renderDetail();syncBodScope()});
-  document.getElementById('bod-f-status').addEventListener('change',function(){bodFilters.status=this.value;renderDetail();syncBodScope()});
+  document.getElementById('bod-f-partner').addEventListener('change',function(){
+    const v=this.value;
+    bodFilters.partner = v==='All' ? 'all' : ((partners.find(p=>p.name===v)||{}).id || 'all');
+    document.querySelectorAll('#partnerFilters [data-pid]').forEach(b=>{b.classList.toggle('active',b.dataset.pid===bodFilters.partner)});
+    renderDetail();renderBod();syncBodScope();
+  });
+  document.getElementById('bod-f-channel').addEventListener('change',function(){bodFilters.channel=this.value;renderDetail();renderBod();syncBodScope()});
+  document.getElementById('bod-f-status').addEventListener('change',function(){bodFilters.status=this.value;renderDetail();renderBod();syncBodScope()});
 }
 function resetBodFilters(){
   bodFilters={partner:'all',channel:'All',status:'All'};
@@ -2009,61 +2017,20 @@ function resetBodFilters(){
   document.getElementById('bod-f-channel').value='All';
   document.getElementById('bod-f-status').value='All';
   document.querySelectorAll('#partnerFilters [data-pid]').forEach(b=>b.classList.toggle('active',b.dataset.pid==='all'));
-  renderDetail(); syncBodScope();
+  renderDetail(); renderBod(); syncBodScope();
 }
 function syncBodScope(){
   const note=document.getElementById('bod-scope');
   const parts=[];
-  if(bodFilters.partner!=='all') parts.push('Partner = '+bodFilters.partner);
+  if(bodFilters.partner!=='all') parts.push('Partner = '+((partners.find(p=>p.id===bodFilters.partner)||{}).name||bodFilters.partner));
   if(bodFilters.channel!=='All') parts.push('Channel = '+bodFilters.channel);
   if(bodFilters.status!=='All') parts.push('Status = '+bodFilters.status);
   if(parts.length){note.style.display='inline-flex';note.innerHTML=`Showing: ${parts.join(' · ')} <button onclick="resetBodFilters()">clear</button>`;}
   else{note.style.display='none';}
 }
 
+// Static legend for the outlet chart (colors don't depend on filters — insert once)
 (function(){
-  const totalActual=partners.reduce((s,p)=>s+p.monthlyActual.reduce((a,b)=>a+b,0),0);
-  const totalPlan=partners.reduce((s,p)=>s+p.planYear,0);
-  const riskCount=[...new Set(partners.flatMap(p=>p.deliveries.filter(d=>d.status==='Behind'||d.status==='At Risk').map(d=>d.outlet)))].length;
-  document.getElementById('kpi-total').textContent=numFmt(totalActual);
-  document.getElementById('kpi-plan').textContent=numFmt(totalPlan);
-  document.getElementById('kpi-pct').textContent=Math.round(totalActual/totalPlan*100)+'%';
-  document.getElementById('kpi-risk').textContent=riskCount;
-})();
-
-(function(){
-  const planMonth=partners.reduce((s,p)=>s+Math.round(p.planYear/12),0);
-  const cumPlan=[],cumAct=[];
-  let sp=0,sa=0;
-  for(let i=0;i<12;i++){
-    sp+=planMonth;
-    const monthAct=partners.reduce((s,p)=>s+(p.monthlyActual[i]||0),0);
-    sa+=monthAct;
-    cumPlan.push(sp);
-    cumAct.push(sa);
-  }
-  document.getElementById('line-legend').innerHTML=`<span class="leg"><span class="leg-sq" style="background:#8b5cf6"></span>Actual (cumulative)</span><span class="leg"><span class="leg-sq" style="background:#c9c7c2;border:.5px dashed #888"></span>Plan (cumulative)</span>`;
-  new Chart(document.getElementById('lineChart'),{
-    type:'line',
-    data:{labels:MONTHS,datasets:[
-      {label:'Actual',data:cumAct,borderColor:'#8b5cf6',backgroundColor:'rgba(139,92,246,0.08)',tension:.35,pointRadius:3,pointHoverRadius:5,fill:true},
-      {label:'Plan',data:cumPlan,borderColor:'#c9c7c2',borderDash:[5,4],backgroundColor:'transparent',tension:.1,pointRadius:0,pointHoverRadius:4}
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${numFmt(ctx.raw)} bottles`}}},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},callback:v=>numFmt(v)}}}}
-  });
-})();
-
-(function(){
-  const outletMap={};
-  partners.forEach(p=>p.deliveries.forEach(d=>{
-    if(!outletMap[d.outlet])outletMap[d.outlet]={actual:0,plan:0};
-    outletMap[d.outlet].actual+=d.actual;
-    outletMap[d.outlet].plan+=d.plan;
-  }));
-  const sorted=Object.entries(outletMap).sort((a,b)=>b[1].actual-a[1].actual).slice(0,10);
-  const oColors=sorted.map(e=>{const r=e[1].actual/e[1].plan;return r>=1?'#2e8b45':r>=0.8?'#2f6fed':r>=0.6?'#e5942a':'#e0433c'});
-  const oPcts=sorted.map(e=>Math.round(e[1].actual/e[1].plan*100));
-
   const outletCard=document.getElementById('outletBar').closest('.card');
   const legDiv=document.createElement('div');
   legDiv.style.cssText='display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--text-2);margin-bottom:10px;align-items:center';
@@ -2074,8 +2041,92 @@ function syncBodScope(){
     <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#e0433c;display:inline-block"></span>Behind &lt;60%</span>
     <span style="display:flex;align-items:center;gap:4px;margin-left:4px"><span style="width:10px;height:10px;border-radius:2px;background:rgba(180,178,169,0.5);border:.5px solid #b4b2a9;display:inline-block"></span>Plan</span>`;
   outletCard.insertBefore(legDiv, document.getElementById('outletBar').parentElement);
+})();
 
-  new Chart(document.getElementById('outletBar'),{
+/* renderBod(): single source of truth for every BOD chart + KPI, re-run whenever
+   Partner / Channel / Status filters change, so the whole tab stays in sync. */
+let bodCharts={};
+function bodFlatDeliveries(){
+  const rows=[];
+  partners.forEach(p=>p.deliveries.forEach(d=>{
+    rows.push({...d,partnerId:p.id,partnerName:p.name,partnerColor:p.color});
+  }));
+  return rows;
+}
+function bodFilteredRows(){
+  return bodFlatDeliveries().filter(r=>
+    (bodFilters.partner==='all'||r.partnerId===bodFilters.partner) &&
+    (bodFilters.channel==='All'||r.seg===bodFilters.channel) &&
+    (bodFilters.status==='All'||r.status===bodFilters.status)
+  );
+}
+function bodEffectivePartners(){
+  // Partner-level aggregates (plan/monthly actual) only exist at the whole-partner grain,
+  // so: a Partner filter narrows the partner set directly; a Channel/Status filter narrows
+  // it to partners that have at least one matching delivery row.
+  if(bodFilters.channel==='All' && bodFilters.status==='All'){
+    return bodFilters.partner==='all' ? partners : partners.filter(p=>p.id===bodFilters.partner);
+  }
+  const rows=bodFilteredRows();
+  const ids=new Set(rows.map(r=>r.partnerId));
+  return partners.filter(p=>ids.has(p.id));
+}
+function heatColor(v,max){
+  if(!v)return{bg:'#f4f4f2',tx:'#9a9793'};
+  const pct=v/max;
+  if(pct<.2)return{bg:'#e6f4e9',tx:'#1c5a2c'};
+  if(pct<.4)return{bg:'#a8d9b4',tx:'#1c5a2c'};
+  if(pct<.6)return{bg:'#2e8b45',tx:'#fff'};
+  if(pct<.8)return{bg:'#227036',tx:'#fff'};
+  return{bg:'#1c5a2c',tx:'#fff'};
+}
+
+function renderBod(){
+  const rows=bodFilteredRows();
+  const effPartners=bodEffectivePartners();
+
+  /* ── KPI band ── */
+  const totalActual=effPartners.reduce((s,p)=>s+p.monthlyActual.reduce((a,b)=>a+b,0),0);
+  const totalPlan=effPartners.reduce((s,p)=>s+p.planYear,0);
+  const riskCount=[...new Set(rows.filter(d=>d.status==='Behind'||d.status==='At Risk').map(d=>d.outlet))].length;
+  document.getElementById('kpi-total').textContent=numFmt(totalActual);
+  document.getElementById('kpi-plan').textContent=numFmt(totalPlan);
+  document.getElementById('kpi-pct').textContent=(totalPlan?Math.round(totalActual/totalPlan*100):0)+'%';
+  document.getElementById('kpi-risk').textContent=riskCount;
+
+  /* ── Line chart: cumulative actual vs plan, scoped to effective partners ── */
+  const planMonth=effPartners.reduce((s,p)=>s+Math.round(p.planYear/12),0);
+  const cumPlan=[],cumAct=[];
+  let sp=0,sa=0;
+  for(let i=0;i<12;i++){
+    sp+=planMonth;
+    const monthAct=effPartners.reduce((s,p)=>s+(p.monthlyActual[i]||0),0);
+    sa+=monthAct;
+    cumPlan.push(sp); cumAct.push(sa);
+  }
+  document.getElementById('line-legend').innerHTML=`<span class="leg"><span class="leg-sq" style="background:#8b5cf6"></span>Actual (cumulative)</span><span class="leg"><span class="leg-sq" style="background:#c9c7c2;border:.5px dashed #888"></span>Plan (cumulative)</span>`;
+  if(bodCharts.line) bodCharts.line.destroy();
+  bodCharts.line=new Chart(document.getElementById('lineChart'),{
+    type:'line',
+    data:{labels:MONTHS,datasets:[
+      {label:'Actual',data:cumAct,borderColor:'#8b5cf6',backgroundColor:'rgba(139,92,246,0.08)',tension:.35,pointRadius:3,pointHoverRadius:5,fill:true},
+      {label:'Plan',data:cumPlan,borderColor:'#c9c7c2',borderDash:[5,4],backgroundColor:'transparent',tension:.1,pointRadius:0,pointHoverRadius:4}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${numFmt(ctx.raw)} bottles`}}},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},callback:v=>numFmt(v)}}}}
+  });
+
+  /* ── Outlet comparison: top 10 outlets under current filters ── */
+  const outletMap={};
+  rows.forEach(d=>{
+    if(!outletMap[d.outlet])outletMap[d.outlet]={actual:0,plan:0};
+    outletMap[d.outlet].actual+=d.actual;
+    outletMap[d.outlet].plan+=d.plan;
+  });
+  const sorted=Object.entries(outletMap).sort((a,b)=>b[1].actual-a[1].actual).slice(0,10);
+  const oColors=sorted.map(e=>{const r=e[1].actual/e[1].plan;return r>=1?'#2e8b45':r>=0.8?'#2f6fed':r>=0.6?'#e5942a':'#e0433c'});
+  const oPcts=sorted.map(e=>Math.round(e[1].actual/e[1].plan*100));
+  if(bodCharts.outlet) bodCharts.outlet.destroy();
+  bodCharts.outlet=new Chart(document.getElementById('outletBar'),{
     type:'bar',
     data:{
       labels:sorted.map(e=>e[0]),
@@ -2088,7 +2139,6 @@ function syncBodScope(){
       indexAxis:'y',responsive:true,maintainAspectRatio:false,
       interaction:{mode:'index',intersect:false},
       plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{
-        const e=sorted[ctx.dataIndex];
         const pct=oPcts[ctx.dataIndex];
         if(ctx.datasetIndex===0)return [' Actual: '+numFmt(ctx.raw)+' bottles',' Rate: '+pct+'%'];
         return ' Plan: '+numFmt(ctx.raw)+' bottles';
@@ -2099,35 +2149,38 @@ function syncBodScope(){
       }
     }
   });
-})();
+  if(!sorted.length){
+    const ctx=document.getElementById('outletBar');
+    // Chart.js renders an empty frame gracefully when labels/data are empty; no extra handling required.
+  }
 
-(function(){
-  const labels=partners.map(p=>p.name);
-  const actuals=partners.map(p=>p.monthlyActual.reduce((a,b)=>a+b,0));
-  const colors=partners.map(p=>p.color);
+  /* ── Partner donut + bar: scoped to effective partners ── */
+  const pLabels=effPartners.map(p=>p.name);
+  const pActuals=effPartners.map(p=>p.monthlyActual.reduce((a,b)=>a+b,0));
+  const pColors=effPartners.map(p=>p.color);
   const leg=document.getElementById('partner-donut-legend');
-  partners.forEach((p,i)=>{leg.innerHTML+=`<span class="leg"><span class="leg-sq" style="background:${p.color}"></span>${p.name.split(' ').slice(0,2).join(' ')} ${actuals[i]}</span>`});
-  new Chart(document.getElementById('partnerDonut'),{
+  leg.innerHTML='';
+  effPartners.forEach((p,i)=>{leg.innerHTML+=`<span class="leg"><span class="leg-sq" style="background:${p.color}"></span>${p.name.split(' ').slice(0,2).join(' ')} ${pActuals[i]}</span>`});
+  if(bodCharts.donut) bodCharts.donut.destroy();
+  bodCharts.donut=new Chart(document.getElementById('partnerDonut'),{
     type:'doughnut',
-    data:{labels,datasets:[{data:actuals,backgroundColor:colors,borderWidth:2,borderColor:'#fff'}]},
+    data:{labels:pLabels,datasets:[{data:pActuals,backgroundColor:pColors,borderWidth:2,borderColor:'#fff'}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${ctx.raw} bottles`}}},cutout:'58%'}
   });
-})();
 
-(function(){
-  const labels=partners.map(p=>p.name.split(' ').slice(0,2).join(' '));
-  const actuals=partners.map(p=>p.monthlyActual.reduce((a,b)=>a+b,0));
-  const plans=partners.map(p=>p.planYear);
-  const pcts=actuals.map((a,i)=>Math.round(a/plans[i]*100));
-  const barColors=actuals.map((a,i)=>a>=plans[i]?'#2e8b45':a/plans[i]>=0.8?'#2f6fed':a/plans[i]>=0.6?'#e5942a':'#e0433c');
-  new Chart(document.getElementById('partnerBar'),{
+  const pShort=effPartners.map(p=>p.name.split(' ').slice(0,2).join(' '));
+  const pPlans=effPartners.map(p=>p.planYear);
+  const pPcts=pActuals.map((a,i)=>pPlans[i]?Math.round(a/pPlans[i]*100):0);
+  const pBarColors=pActuals.map((a,i)=>{const r=pPlans[i]?a/pPlans[i]:0;return r>=1?'#2e8b45':r>=0.8?'#2f6fed':r>=0.6?'#e5942a':'#e0433c'});
+  if(bodCharts.bar) bodCharts.bar.destroy();
+  bodCharts.bar=new Chart(document.getElementById('partnerBar'),{
     type:'bar',
     data:{
-      labels,
+      labels:pShort,
       datasets:[
-        {label:'Actual',data:actuals,backgroundColor:barColors,borderRadius:3,borderSkipped:false,yAxisID:'y',order:2},
-        {label:'Plan',data:plans,backgroundColor:'rgba(180,178,169,0.25)',borderColor:'#b4b2a9',borderWidth:.5,borderRadius:3,borderSkipped:false,yAxisID:'y',order:3},
-        {label:'Completion %',data:pcts,type:'line',borderColor:'#181818',backgroundColor:'transparent',tension:.3,pointRadius:4,pointHoverRadius:6,pointBackgroundColor:pcts.map(v=>v>=100?'#2e8b45':v>=80?'#2f6fed':v>=60?'#e5942a':'#e0433c'),borderWidth:1.5,yAxisID:'y2',order:1}
+        {label:'Actual',data:pActuals,backgroundColor:pBarColors,borderRadius:3,borderSkipped:false,yAxisID:'y',order:2},
+        {label:'Plan',data:pPlans,backgroundColor:'rgba(180,178,169,0.25)',borderColor:'#b4b2a9',borderWidth:.5,borderRadius:3,borderSkipped:false,yAxisID:'y',order:3},
+        {label:'Completion %',data:pPcts,type:'line',borderColor:'#181818',backgroundColor:'transparent',tension:.3,pointRadius:4,pointHoverRadius:6,pointBackgroundColor:pPcts.map(v=>v>=100?'#2e8b45':v>=80?'#2f6fed':v>=60?'#e5942a':'#e0433c'),borderWidth:1.5,yAxisID:'y2',order:1}
       ]
     },
     options:{
@@ -2144,32 +2197,18 @@ function syncBodScope(){
       }
     }
   });
-})();
 
-(function(){
+  /* ── Heatmap: partner × channel, respecting Channel/Status/Partner filters ── */
   const matrix={};
-  partners.forEach(p=>{
-    matrix[p.id]={};
-    CHANNELS.forEach(ch=>{matrix[p.id][ch]=0});
-    p.deliveries.forEach(d=>{matrix[p.id][d.seg]=(matrix[p.id][d.seg]||0)+d.actual});
-  });
-  const allVals=partners.flatMap(p=>CHANNELS.map(ch=>matrix[p.id][ch]));
-  const maxVal=Math.max(...allVals);
-
-  function heatColor(v,max){
-    if(!v)return{bg:'#f4f4f2',tx:'#9a9793'};
-    const pct=v/max;
-    if(pct<.2)return{bg:'#e6f4e9',tx:'#1c5a2c'};
-    if(pct<.4)return{bg:'#a8d9b4',tx:'#1c5a2c'};
-    if(pct<.6)return{bg:'#2e8b45',tx:'#fff'};
-    if(pct<.8)return{bg:'#227036',tx:'#fff'};
-    return{bg:'#1c5a2c',tx:'#fff'};
-  }
+  effPartners.forEach(p=>{matrix[p.id]={};CHANNELS.forEach(ch=>{matrix[p.id][ch]=0})});
+  rows.forEach(d=>{ if(matrix[d.partnerId]) matrix[d.partnerId][d.seg]=(matrix[d.partnerId][d.seg]||0)+d.actual; });
+  const allVals=effPartners.flatMap(p=>CHANNELS.map(ch=>matrix[p.id][ch]));
+  const maxVal=Math.max(1,...allVals);
 
   let h='<thead><tr><th class="left">Mfg. Partner</th>';
   CHANNELS.forEach(ch=>{h+=`<th>${ch}</th>`});
   h+='<th>Total</th></tr></thead><tbody>';
-  partners.forEach(p=>{
+  effPartners.forEach(p=>{
     const rowTotal=CHANNELS.reduce((s,ch)=>s+matrix[p.id][ch],0);
     h+=`<tr><td class="left"><span style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:50%;background:${p.color};flex-shrink:0"></span>${p.name}</span></td>`;
     CHANNELS.forEach(ch=>{
@@ -2177,19 +2216,22 @@ function syncBodScope(){
       const {bg,tx}=heatColor(v,maxVal);
       h+=`<td><span class="heat-cell" style="background:${bg};color:${tx}">${v||'—'}</span></td>`;
     });
-    const {bg:tbg,tx:ttx}=heatColor(rowTotal,partners.reduce((s,p2)=>s+CHANNELS.reduce((ss,ch)=>ss+matrix[p2.id][ch],0),0)/partners.length*1.5);
+    const {bg:tbg,tx:ttx}=heatColor(rowTotal,maxVal*1.5);
     h+=`<td><span class="heat-cell" style="background:${tbg};color:${ttx};font-weight:700">${numFmt(rowTotal)}</span></td></tr>`;
   });
+  if(!effPartners.length) h+='<tr><td colspan="'+(CHANNELS.length+2)+'" style="text-align:center;color:var(--text-3);padding:16px">No partners match the selected filters</td></tr>';
   h+='<tr style="background:var(--surface2)"><td class="left" style="font-weight:600;color:var(--text-2)">Total by Channel</td>';
   let grandTotal=0;
   CHANNELS.forEach(ch=>{
-    const chTotal=partners.reduce((s,p)=>s+matrix[p.id][ch],0);
+    const chTotal=effPartners.reduce((s,p)=>s+matrix[p.id][ch],0);
     grandTotal+=chTotal;
     h+=`<td style="font-weight:600;font-size:11px">${numFmt(chTotal)||'—'}</td>`;
   });
   h+=`<td style="font-weight:700">${numFmt(grandTotal)}</td></tr>`;
   document.getElementById('bodHmTable').innerHTML=h+'</tbody>';
-})();
+}
+
+renderBod();
 
 (function(){
   const wrap=document.getElementById('accordionWrap');
@@ -2325,6 +2367,7 @@ function syncBodScope(){
       b.classList.toggle('active',b.dataset.pid===bodFilters.partner);
     });
     renderDetail();
+    renderBod();
     syncBodScope();
   });
 })();
